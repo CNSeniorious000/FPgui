@@ -1,5 +1,8 @@
 from curses.ascii import SI
 from itertools import count
+from subprocess import call
+
+from numpy import mat
 from window import *
 from button import *
 from loguru import logger
@@ -80,14 +83,26 @@ def parse_mouse_pos(pos):
             else:
                 widget.situation = Situation.hovering
             hovering = widget
-            return  # 不return的话可能有多个hovering
+            return  # 假定同时只会hover一个
     else:
         if hovering is not None:
             hovering.situation = Situation.standby
             hovering = None
 
-def parse_events(events):
-    
+def parse_event(event):
+    global pressed
+    match event.type:
+        case pg.MOUSEBUTTONDOWN:
+            if event.button == pg.BUTTON_LEFT and hovering is not None:
+                pressed = hovering
+                pressed.situation = Situation.pressing
+        case pg.MOUSEBUTTONUP:
+            if event.button == pg.BUTTON_LEFT and pressed is not None:
+                if pressed == hovering:
+                    pressed.situation = Situation.clicked
+                pressed = None
+        case _:
+            pass
 
 def on_lose_focus():
     global hovering, pressed
@@ -107,7 +122,37 @@ def main_loop():
     queue = scene.queue
 
     for num in count(num):
+        # parse all events
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                return
+            else:
+                parse_event(event)
+        # parse mouse position
         if pg.mouse.get_focused():
             parse_mouse_pos(pg.mouse.get_pos())
         else:
             on_lose_focus()
+        # evoke all callbacks from the queue
+        while queue:
+            """
+            要先执行完queue再update
+            因为有的update()可能会添加新的callback
+            例如下一帧的动画什么的
+            """
+            callback, args, kwargs = queue.popleft()
+            logger.info(f"calling {callback}(*{args}, **{kwargs})")
+            if ans := callback(*args, **kwargs):
+                if Action.scene_change in ans:
+                    ...
+                if Action.break_loop in ans:
+                    return
+            
+            # update
+
+            # render
+
+            # display flip
+
+        
+
