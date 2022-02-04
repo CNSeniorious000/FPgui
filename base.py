@@ -34,6 +34,12 @@ class Action(enum.Flag):
     break_loop = enum.auto()
 
 
+class Strategy(enum.IntEnum):
+    each = 0
+    union = 1
+    whole = 2
+
+
 class Blend(enum.Enum):
     """several blend mode"""
     "-> 更暗 <-"
