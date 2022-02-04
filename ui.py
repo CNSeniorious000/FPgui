@@ -109,7 +109,7 @@ def on_lose_focus():
         pressed.situation = Situation.standby
         pressed = None
 
-def on_clear(window:Window=scene):
+def clear_each(window:Window=scene):
     bgd = window.bgd
     blit = window.canvas.blit
     return [
@@ -117,8 +117,42 @@ def on_clear(window:Window=scene):
         for widget in window.render_group
     ]
 
-def on_clear(window:Window=scene):
-    rect = pg.Rect.unionall()
+def clear_union(window:Window=scene):
+    it = iter(window.render_group)
+    rect = next(it).rect.unionall([s.rect for s in it])
+    return window.canvas.blit(window.bgd, rect, rect)
+
+def clear_whole(window:Window=scene):
+    return window.canvas.blit(window.bgd, (0,0))
+
+clear_strategy = Strategy.each
+
+def on_clear(window:Window=scene, heuristic=False):
+    group = window.render_group
+    if heuristic:
+        global clear_strategy
+        if len(group) > 12345:
+            clear_strategy = Strategy.whole
+            return clear_whole(window)
+        else:
+            if (total_size := sum(s.rect.size for s in group)) < \
+               (union_size := (_:=clear_whole(window)).size()):
+                logger.info(f"({total_size=}) < ({union_size=})")
+                clear_strategy = Strategy.each
+            else:
+                logger.info(f"({total_size=}) > ({union_size=})")
+                clear_strategy = Strategy.union
+            return _
+    else:
+        match clear_strategy:
+            case Strategy.each: return clear_each(window)
+            case Strategy.union: return clear_union(window)
+            case Strategy.whole: return clear_whole(window)
+            case _: raise ValueError(type(clear_strategy), clear_strategy)
+
+target = 60
+efficient = True
+display_fps = True
 
 def main_loop():
     global num
@@ -151,17 +185,21 @@ def main_loop():
             logger.info(f"calling {callback}(*{args}, **{kwargs})")
             if ans := callback(*args, **kwargs):
                 if Action.scene_change in ans:
+                    pass
                     ...
                 if Action.break_loop in ans:
                     return
             
             # update
-            if render_group:
-                on_clear()
+            if logic_group:
+                logic_group.update()
 
             # render
+            if render_group:
+                on_clear()
+                pg.display.update(render_group.draw(screen))
 
-            # display flip
-
-        
-
+            # tick
+            _ = (clock.tick if efficient else clock.tick_busy_loop)(target)
+            if display_fps:
+                pg.display.set_caption(f"60fps @ {1000/_ :.2f}")

@@ -1,23 +1,24 @@
 from magic import *
+from base import *
 from config import *
-from typing import Any, Literal, Callable
+from typing import Any
 
 
 class Label(pg.sprite.Sprite):
     pass
 
 
-class Spyer(pg.sprite.Sprite):
+class Monitor(pg.sprite.Sprite):
     def __init__(
             self,
             group: pg.sprite.Group,
             entity: Any,
-            anchor,
-            align:Align = Align.center,
-            size=text_size,
-            color=black,
-            font=font,
-            subpixel=True
+            anchor: tuple[int ,int],
+            align: Align = Align.center,
+            size: int = text_size,
+            color: tuple = black,
+            font: str = font,
+            subpixel: bool = True
     ):
         self.last = None
         pg.sprite.Sprite.__init__(self, group)
