@@ -1,4 +1,4 @@
-from names import *
+from base import *
 import numpy as np
 import pygame as pg
 

@@ -19,12 +19,14 @@ class Align(enum.Flag):
     bottom_left  = min_x | max_y  # 左下
     bottom_right = max_x | max_y  # 右下
 
+
 class Situation(enum.IntEnum):
     standby = 0
     hovering = 1
     pressing = 2
     clicked = 3
     """光是released没有意义"""
+
 
 class Action(enum.Flag):
     nothing = 0

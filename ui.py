@@ -109,7 +109,16 @@ def on_lose_focus():
         pressed.situation = Situation.standby
         pressed = None
 
+def on_clear(window:Window=scene):
+    bgd = window.bgd
+    blit = window.canvas.blit
+    return [
+        blit(bgd, rect:=widget.rect, rect)
+        for widget in window.render_group
+    ]
 
+def on_clear(window:Window=scene):
+    rect = pg.Rect.unionall()
 
 def main_loop():
     global num
@@ -118,6 +127,7 @@ def main_loop():
     queue = scene.queue
 
     for num in count(num):
+
         # parse all events
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -129,6 +139,7 @@ def main_loop():
             parse_mouse_pos(pg.mouse.get_pos())
         else:
             on_lose_focus()
+
         # evoke all callbacks from the queue
         while queue:
             """
@@ -145,6 +156,8 @@ def main_loop():
                     return
             
             # update
+            if render_group:
+                on_clear()
 
             # render
 

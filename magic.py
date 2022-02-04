@@ -1,7 +1,7 @@
 import os, ctypes, pickle, bz2
 ctypes.windll.user32.SetProcessDPIAware(2)
-os.environ["NUMBA_NUM_THREADS"] = "1"
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
+os.environ['NUMBA_NUM_THREADS'] = '1'
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from functools import cache, singledispatchmethod
 import numpy as np
 import numba as nb
