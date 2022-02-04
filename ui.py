@@ -1,8 +1,4 @@
-from curses.ascii import SI
 from itertools import count
-from subprocess import call
-
-from numpy import mat
 from window import *
 from button import *
 from loguru import logger
