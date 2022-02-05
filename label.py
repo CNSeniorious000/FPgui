@@ -50,4 +50,4 @@ class Monitor(pg.sprite.Sprite):
         return paint_PIL(str(self.last), self.color, self.font, self.size)
 
     def __repr__(self):
-        return f"Spyer(last={self.last})"
+        return f"Monitor(last={self.last})"
