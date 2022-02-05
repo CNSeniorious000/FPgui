@@ -109,7 +109,7 @@ def on_lose_focus():
         pressed.situation = Situation.standby
         pressed = None
 
-def clear_each(window:Window=scene):
+def clear_each(window: Window = scene):
     bgd = window.bgd
     blit = window.canvas.blit
     return [
@@ -117,17 +117,17 @@ def clear_each(window:Window=scene):
         for widget in window.render_group
     ]
 
-def clear_union(window:Window=scene):
+def clear_union(window: Window = scene):
     it = iter(window.render_group)
     rect = next(it).rect.unionall([s.rect for s in it])
     return window.canvas.blit(window.bgd, rect, rect)
 
-def clear_whole(window:Window=scene):
+def clear_whole(window: Window = scene):
     return window.canvas.blit(window.bgd, (0,0))
 
 clear_strategy = Strategy.each
 
-def on_clear(window:Window=scene, heuristic=False):
+def on_clear(window: Window = scene, heuristic=False):
     group = window.render_group
     if heuristic:
         global clear_strategy
@@ -153,21 +153,23 @@ def on_clear(window:Window=scene, heuristic=False):
 target = 60
 efficient = True
 display_fps = True
+title = "FPgui"
 
 def main_loop():
+    assert scene
     global num
     logic_group = scene.logic_group
     render_group = scene.render_group
     queue = scene.queue
 
     for num in count(num):
-
         # parse all events
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
             else:
                 parse_event(event)
+
         # parse mouse position
         if pg.mouse.get_focused():
             parse_mouse_pos(pg.mouse.get_pos())
@@ -190,16 +192,16 @@ def main_loop():
                 if Action.break_loop in ans:
                     return
             
-            # update
-            if logic_group:
-                logic_group.update()
+        # update
+        if logic_group:
+            logic_group.update()
 
-            # render
-            if render_group:
-                on_clear()
-                pg.display.update(render_group.draw(screen))
+        # render
+        if render_group:
+            on_clear()
+            pg.display.update(render_group.draw(screen))
 
-            # tick
-            _ = (clock.tick if efficient else clock.tick_busy_loop)(target)
-            if display_fps:
-                pg.display.set_caption(f"60fps @ {1000/_ :.2f}")
+        # tick
+        _ = clock.tick(target) if efficient else clock.tick_busy_loop(target)
+        if display_fps:
+            pg.display.set_caption(f"{title} @ {1000/_ :.2f}")

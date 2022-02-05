@@ -96,6 +96,7 @@ class Pushbutton(ButtonBase):
     @staticmethod
     @memoize
     def get_surface():
+        pass
 
     def setup(self):
         rect = self._rect
