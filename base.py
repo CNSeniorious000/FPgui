@@ -14,10 +14,23 @@ class Align(enum.Flag):
     mid_left     = min_x | mid_y  # 中左
     mid_right    = max_x | mid_y  # 中右
     center       = mid_x | mid_y  # 中央
-    left_top     = min_x | min_y  # 左上
-    right_top    = max_x | min_y  # 左右
+    top_left     = min_x | min_y  # 左上
+    top_right    = max_x | min_y  # 左右
     bottom_left  = min_x | max_y  # 左下
     bottom_right = max_x | max_y  # 右下
+
+
+def locate(rect, align:Align, anchor):
+    match align:
+        case Align.top_left: rect.topleft = anchor
+        case Align.mid_top: rect.midtop = anchor
+        case Align.top_right: rect.topright = anchor
+        case Align.mid_left: rect.midleft = anchor
+        case Align.center: rect.center = anchor
+        case Align.mid_right: rect.midright = anchor
+        case Align.bottom_left: rect.bottomleft = anchor
+        case Align.mid_bottom: rect.midbottom = anchor
+        case Align.bottom_right: rect.bottomright = anchor
 
 
 class Situation(enum.IntEnum):

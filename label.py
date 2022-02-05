@@ -47,9 +47,8 @@ class Monitor(pg.sprite.Sprite):
 
     @property
     def image(self):
-        surface = paint_PIL(str(self.last), self.color, self.font, self.size)
-        w, h = surface
-
+        surface: pg.Surface = paint_PIL(str(self.last), self.color, self.font, self.size)
+        self.rect = locate(surface.get_rect(), self.align, self.anchor)
         return surface
 
     def __repr__(self):
