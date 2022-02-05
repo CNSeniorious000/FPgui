@@ -13,7 +13,7 @@ class Monitor(pg.sprite.Sprite):
             self,
             group: pg.sprite.Group,
             entity: Any,
-            anchor: tuple[int ,int],
+            anchor: tuple[int,int],
             align: Align = Align.center,
             size: int = text_size,
             color: tuple = black,
@@ -47,7 +47,10 @@ class Monitor(pg.sprite.Sprite):
 
     @property
     def image(self):
-        return paint_PIL(str(self.last), self.color, self.font, self.size)
+        surface = paint_PIL(str(self.last), self.color, self.font, self.size)
+        w, h = surface
+
+        return surface
 
     def __repr__(self):
         return f"Monitor(last={self.last})"
