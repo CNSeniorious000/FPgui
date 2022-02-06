@@ -28,10 +28,11 @@ def switch_to(window:Window):
     if window.size != size:
         size[:] = window.size
         screen = pg.display.set_mode(size, flags | pg.SHOWN, vsync=True)
+        screen.blit(window.canvas, (0,0))
     window.canvas = screen
     window.shown = True
 
-    return Action.scene_change
+    return Action.scene_changed
 
 def center():
     hWnd = pg.display.get_wm_info()["window"]
@@ -41,7 +42,7 @@ def center():
 
 def use(window:Window, centering=True):
     if window is scene:
-        return logger.warning(f"<{window = }> on scene.")
+        return logger.warning(f"<{window = }> on scene")
     switch_to(window)
 
     if centering:
@@ -49,9 +50,11 @@ def use(window:Window, centering=True):
 
     pg.display.flip()
 
-    return Action.scene_change
+    return Action.scene_changed
 
 def hide(clear=True):
+    if scene is None:
+        return logger.error("window is already hidden")
     if clear:
         scene.queue.clear()
     use(None, False)
@@ -156,7 +159,8 @@ display_fps = True
 title = "FPgui"
 
 def main_loop():
-    assert scene
+    if scene is None:
+        return logger.error("no window on scene")
     global num
     logic_group = scene.logic_group
     render_group = scene.render_group
@@ -186,11 +190,15 @@ def main_loop():
             callback, args, kwargs = queue.popleft()
             logger.info(f"calling {callback}(*{args}, **{kwargs})")
             if ans := callback(*args, **kwargs):
-                if Action.scene_change in ans:
-                    pass
-                    ...
+                if Action.scene_changed in ans:
+                    logic_group = scene.logic_group
+                    render_group = scene.render_group
+                    queue = scene.queue
+
+                ...
+
                 if Action.break_loop in ans:
-                    return
+                    return hide()
             
         # update
         if logic_group:

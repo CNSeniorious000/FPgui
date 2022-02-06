@@ -1,13 +1,13 @@
 import enum
 
 
-class Align(enum.Flag):
-    min_x = left   = enum.auto()
-    mid_x =          enum.auto()
-    max_x = right  = enum.auto()
+class Align(enum.IntFlag):
     min_y = top    = enum.auto()
     mid_y =          enum.auto()
     max_y = bottom = enum.auto()
+    min_x = left   = enum.auto()
+    mid_x =          enum.auto()
+    max_x = right  = enum.auto()
 
     mid_top      = mid_x | min_y  # 中上
     mid_bottom   = mid_x | max_y  # 中下
@@ -32,7 +32,7 @@ def locate(rect, align:Align, anchor):
         case Align.mid_bottom: rect.midbottom = anchor
         case Align.bottom_right: rect.bottomright = anchor
     return rect
-    
+
 
 class Situation(enum.IntEnum):
     standby = 0
@@ -44,7 +44,7 @@ class Situation(enum.IntEnum):
 
 class Action(enum.Flag):
     nothing = 0
-    scene_change = enum.auto()
+    scene_changed = enum.auto()
     break_loop = enum.auto()
 
 

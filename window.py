@@ -34,6 +34,6 @@ class Window:
         self.render_group = pg.sprite.RenderUpdates()
 
     def __repr__(self):
-        return "Frame(size={}x{}, shown={})".format(*self.size, self.shown)
+        return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
 
 

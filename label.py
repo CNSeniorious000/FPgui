@@ -18,10 +18,10 @@ class Monitor(pg.sprite.Sprite):
             size: int = text_size,
             color: tuple = black,
             font: str = font,
+            cache: bool = True,
             subpixel: bool = True
     ):
-        self.last = None
-        self.image = None
+        self.last = self.image = self.rect = None
         pg.sprite.Sprite.__init__(self, group)
         self.group = group
         self.entity = entity
@@ -31,7 +31,14 @@ class Monitor(pg.sprite.Sprite):
         self.color = color
         self.font = font
         self.subpixel = subpixel
-        
+
+        _ = lambda string: paint_PIL(
+            str(string), self.color, self.font, self.size,
+            {1:"left", 2:"center", 4:"right"}[self.align >> 3]
+        )
+        self.get_surface = memoize_surfaces(_) if cache else _
+        # 留下了重名碰撞缓存的隐患!!
+
         self.update()
 
     def update(self):
@@ -49,7 +56,7 @@ class Monitor(pg.sprite.Sprite):
             self.last = this
             self.group.add(self)
 
-        self.image = surface = paint_PIL(str(self.last), self.color, self.font, self.size)
+        self.image = surface = self.get_surface(str(this))
         self.rect = locate(surface.get_rect(), self.align, self.anchor)
 
     def __repr__(self):
