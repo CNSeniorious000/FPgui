@@ -54,7 +54,7 @@ def use(window:Window, centering=True):
 def hide(clear=True):
     if clear:
         scene.queue.clear()
-    use(None)
+    use(None, False)
 
     return Action.break_loop
 
@@ -109,7 +109,7 @@ def on_lose_focus():
         pressed.situation = Situation.standby
         pressed = None
 
-def clear_each(window: Window = scene):
+def clear_each(window:Window):
     bgd = window.bgd
     blit = window.canvas.blit
     return [
@@ -117,17 +117,17 @@ def clear_each(window: Window = scene):
         for widget in window.render_group
     ]
 
-def clear_union(window: Window = scene):
+def clear_union(window:Window):
     it = iter(window.render_group)
     rect = next(it).rect.unionall([s.rect for s in it])
     return window.canvas.blit(window.bgd, rect, rect)
 
-def clear_whole(window: Window = scene):
+def clear_whole(window:Window):
     return window.canvas.blit(window.bgd, (0,0))
 
 clear_strategy = Strategy.each
 
-def on_clear(window: Window = scene, heuristic=False):
+def on_clear(window:Window, heuristic=False):
     group = window.render_group
     if heuristic:
         global clear_strategy
@@ -166,7 +166,7 @@ def main_loop():
         # parse all events
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                return
+                return hide()
             else:
                 parse_event(event)
 
@@ -198,7 +198,7 @@ def main_loop():
 
         # render
         if render_group:
-            on_clear()
+            on_clear(scene)
             pg.display.update(render_group.draw(screen))
 
         # tick

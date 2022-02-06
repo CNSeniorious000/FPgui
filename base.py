@@ -31,7 +31,8 @@ def locate(rect, align:Align, anchor):
         case Align.bottom_left: rect.bottomleft = anchor
         case Align.mid_bottom: rect.midbottom = anchor
         case Align.bottom_right: rect.bottomright = anchor
-
+    return rect
+    
 
 class Situation(enum.IntEnum):
     standby = 0
