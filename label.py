@@ -21,7 +21,7 @@ class Monitor(pg.sprite.Sprite):
             cache: bool = True,
             subpixel: bool = True
     ):
-        self.last = self.image = self.rect = None
+        self.last = None
         pg.sprite.Sprite.__init__(self, group)
         self.group = group
         self.entity = entity
@@ -39,7 +39,8 @@ class Monitor(pg.sprite.Sprite):
         self.get_surface = memoize_surfaces(_) if cache else _
         # 留下了重名碰撞缓存的隐患!!
 
-        self.update()
+        self.image = None
+        self.rect = pg.Rect(*anchor, 0, 0)
 
     def update(self):
         entity = self.entity
@@ -56,8 +57,8 @@ class Monitor(pg.sprite.Sprite):
             self.last = this
             self.group.add(self)
 
-        self.image = surface = self.get_surface(str(this))
-        self.rect = locate(surface.get_rect(), self.align, self.anchor)
+            self.image = surface = self.get_surface(str(this))
+            self.rect = locate(surface.get_rect(), self.align, self.anchor)
 
     def __repr__(self):
         return f"Monitor(entity={self.entity})"

@@ -169,6 +169,7 @@ def main_loop():
     for num in count(num):
         # parse all events
         for event in pg.event.get():
+            print(f"{event = }")
             if event.type == pg.QUIT:
                 return hide()
             else:
@@ -200,13 +201,16 @@ def main_loop():
                 if Action.break_loop in ans:
                     return hide()
             
+        # clear
+        if render_group:
+            on_clear(scene)
+
         # update
         if logic_group:
             logic_group.update()
 
         # render
         if render_group:
-            on_clear(scene)
             pg.display.update(render_group.draw(screen))
 
         # tick
