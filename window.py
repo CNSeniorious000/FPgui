@@ -11,9 +11,9 @@ def scaled(x):
 
 class Window:
     """cached scene or sub window"""
-    def __init__(self, x, y, bgd=None, shown=False):
+    def __init__(self, x, y, bgd=None):
         self.size = [x, y]
-        self.shown = shown
+        self.shown = False
         buffer = pg.Surface((x, y))
         match bgd:
             case pg.Surface(): buffer.blit(bgd, (0, 0))
@@ -31,7 +31,3 @@ class Window:
 
     def __repr__(self):
         return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
-
-    def __enter__(self)
-
-

@@ -106,10 +106,10 @@ class Pushbutton(ButtonBase):
         self.dirty = True
 
         try:
-            self.text_bbox = txtButton.cache[rect.size, text, font_path, font_size]
+            self.text_bbox = txtButton.cache[rect.font_size, text, font_path, font_size]
             self.text_alpha = txtButton.cache[text, t_color, font_path, font_size]
             try:
-                self.cache = txtButton.cache[rect.size, text, fg_color, t_color, font_path, font_size, radius]
+                self.cache = txtButton.cache[rect.font_size, text, fg_color, t_color, font_path, font_size, radius]
                 self.draw()
                 return  # only chance to avoid recreation of self.cache
             except KeyError:
@@ -120,10 +120,10 @@ class Pushbutton(ButtonBase):
             t_w, t_h = pg.font.Font(font_path, font_size).render(text, False, 0, 0).get_size()
             t_x = (self._rect.w - t_w) // 2
             t_y = (self._rect.h - t_h) // 2
-            self.text_bbox = txtButton.cache[rect.size, text, font_path, font_size] = (t_x, t_y, t_w, t_h)
+            self.text_bbox = txtButton.cache[rect.font_size, text, font_path, font_size] = (t_x, t_y, t_w, t_h)
             self.text_alpha = txtButton.cache[text, t_color, font_path, font_size] \
                 = paintln_FP(text, font_path, font_size, (t_w, t_h), 1, self.t_c)
-        self.cache = txtButton.cache[rect.size, text, fg_color, t_color, font_path, font_size, radius] = {}
+        self.cache = txtButton.cache[rect.font_size, text, fg_color, t_color, font_path, font_size, radius] = {}
 
         self.draw()
 
@@ -137,12 +137,12 @@ class Pushbutton(ButtonBase):
         except KeyError:
             print("/", end="", flush=True)
             fg_c = self.fg_c * self.now
-            w, h = self._rect.size
+            w, h = self._rect.font_size
             surfarray = np.tile(fg_c, w * h).reshape((w, h, 3))
             try:
                 surface = self.image.copy()  # with alpha channel tailed
             except AttributeError:
-                surface = pg.Surface(self._rect.size, pg.SRCALPHA)
+                surface = pg.Surface(self._rect.font_size, pg.SRCALPHA)
                 surface.fill("#ffffff")
                 tailor(pg.surfarray.pixels_alpha(surface), self.radius)
             remix_FP(self.text_alpha, self.t_c, surfarray, self.text_bbox)

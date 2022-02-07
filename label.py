@@ -11,36 +11,43 @@ class Label(pg.sprite.Sprite):
 class Monitor(pg.sprite.Sprite):
     def __init__(
             self,
-            group: pg.sprite.Group,
             entity: Any,
             anchor: tuple[int,int],
+
             align: Align = Align.center,
-            size: int = text_size,
-            color: tuple = black,
-            font: str = font,
+            render_group: pg.sprite.RenderUpdates = None,
+            font_size: int = text_size,
+            font_color: tuple = black,
+            font_path: str = font,
             cache: bool = True,
             subpixel: bool = True
     ):
-        self.last = None
-        pg.sprite.Sprite.__init__(self, group)
-        self.group = group
+        self.last = self.image = self.rect = None
+        pg.sprite.Sprite.__init__(self)
         self.entity = entity
+
         self.anchor = anchor
         self.align = align
-        self.size = size
-        self.color = color
-        self.font = font
+
+        self.render_group = get_render_group() if render_group is None else render_group
+
+        self.font_size = font_size
+        self.font_color = font_color
+        self.font_path = font_path
+
         self.subpixel = subpixel
 
-        _ = lambda string: paint_PIL(
-            str(string), self.color, self.font, self.size,
-            {1:"left", 2:"center", 4:"right"}[self.align >> 3]
-        )
-        self.get_surface = memoize_surfaces(_) if cache else _
-        # 留下了重名碰撞缓存的隐患!!
+        def get_surface(this):
+            return paint_PIL(
+                str(this), self.font_color, self.font_path, self.font_size,
+                {1:"left", 2:"center", 4:"right"}[self.align >> 3]
+            )
+        if cache:
+            get_surface.__name__ += f"{align}{font_size}{font_color}{font_path}"
+            self.get_surface = memoize_surfaces(get_surface)
+        else:
+            self.get_surface = get_surface
 
-        self.image = None
-        self.rect = pg.Rect(*anchor, 0, 0)
 
     def update(self):
         entity = self.entity

@@ -336,3 +336,7 @@ def get_PG_font(path, size):
     font.kerning = True
     font.pad = True
     return font
+
+def get_render_group():
+    import ui
+    return ui.scene.render_group

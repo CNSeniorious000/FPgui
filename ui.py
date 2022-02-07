@@ -4,6 +4,7 @@ from functools import wraps
 from window import *
 from loguru import logger
 import threading
+import contextlib
 
 
 clock = pg.time.Clock()
@@ -148,8 +149,8 @@ def on_clear(window:Window, heuristic=False):
             clear_strategy = Strategy.whole
             return clear_whole(window)
         else:
-            if (total_size := sum(s.rect.size for s in group)) < \
-               (union_size := (_:=clear_whole(window)).size()):
+            if (total_size := sum(s.rect.font_size for s in group)) < \
+               (union_size := (_:=clear_whole(window)).font_size()):
                 logger.info(f"({total_size=}) < ({union_size=})")
                 clear_strategy = Strategy.each
             else:
@@ -223,3 +224,22 @@ def main_loop():
         _ = clock.tick(target) if efficient else clock.tick_busy_loop(target)
         if display_fps:
             pg.display.set_caption(f"{title} @ {1000/_ :.2f}")
+
+# advanced staffs
+
+@contextlib.contextmanager
+def make_window(x, y, bgd=None):
+    try:
+        use(window:=Window(x, y, bgd))
+        yield window
+    finally:
+        main_loop()
+
+@contextlib.contextmanager
+def make_async_window(x, y, bgd=None):
+    window = Window(x, y, bgd)
+    try:
+        threading.Thread(target=lambda: use(window) and main_loop()).start()
+        yield window
+    finally:
+        pass
