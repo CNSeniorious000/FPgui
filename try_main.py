@@ -1,6 +1,7 @@
 import ui
 from window import Window
 from label import Monitor
+import time
 import threading
 
 a = [1,2,3,4]

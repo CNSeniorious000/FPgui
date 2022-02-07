@@ -32,4 +32,6 @@ class Window:
     def __repr__(self):
         return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
 
+    def __enter__(self)
+
 
