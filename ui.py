@@ -2,31 +2,28 @@ from itertools import count
 from window import *
 from base import *
 from loguru import logger
+import threading
 
 
 clock = pg.time.Clock()
 flags = pg.NOFRAME
 size = []
-screen = pg.display.set_mode(flags=pg.HIDDEN)  # to enable convert()
+screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
 scene: Window = None
 hovering = pressed = None
 num = 0
 
 
 def _reset_video_system(*args, **kwargs):
-    # pg.display.quit()
-    pg.quit()
-    pg.init()
-    # pg.display.init()
+    if threading.current_thread().name != 'MainThread':
+        pg.display.quit()
+        pg.display.init()
+        logger.success(threading.current_thread())
     return pg.display.set_mode(*args, **kwargs)
 
 def _check_threading():
-    import threading
     if threading.current_thread().name != 'MainThread':
-        logger.critical(threading.current_thread())
-        global clock, screen
-        screen = _reset_video_system(size, flags | pg.SHOWN, vsync=True)
-        clock = pg.time.Clock()
+        switch_to(scene)
 
 def switch_to(window:Window):
     global screen, scene
