@@ -1,4 +1,13 @@
-import enum
+import os, enum, ctypes, win32api
+os.environ['NUMBA_NUM_THREADS'] = '1'  # disable multiprocessing
+os.environ['SDL_VIDEO_CENTERED'] = '1'  # enable first centering
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable ad
+os.environ['PYGAME_BLEND_ALPHA_SDL2'] = '1'  # enable blend
+os.environ['PYGAME_FORCE_SCALE'] = 'photo'  # enable rescale
+ctypes.windll.user32.SetProcessDPIAware(2)
+SF = ctypes.windll.shcore.GetScaleFactorForDevice(0)
+DSIZE = list(map(win32api.GetSystemMetrics, (0,1)))
+
 
 
 class Align(enum.IntFlag):

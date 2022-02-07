@@ -1,5 +1,5 @@
-from magic import *
 from base import *
+from magic import *
 from config import *
 from typing import Any
 

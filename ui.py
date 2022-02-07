@@ -1,12 +1,12 @@
+from base import *
 from itertools import count
 from window import *
-from base import *
 from loguru import logger
 import threading
 
 
 clock = pg.time.Clock()
-flags = pg.NOFRAME
+flags = pg.NOFRAME | pg.SCALED
 size = []
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
 scene: Window = None
@@ -48,7 +48,7 @@ def switch_to(window:Window):
 
 def center():
     hWnd = pg.display.get_wm_info()["window"]
-    X, Y = display_size
+    X, Y = DSIZE
     x, y = size
     ctypes.windll.user32.MoveWindow(hWnd, (X-x)//2, (Y-y)//2, x, y, False)
 
