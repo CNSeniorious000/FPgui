@@ -20,7 +20,9 @@ def _reset_video_system(*args, **kwargs):
     if threading.current_thread().name != 'MainThread':
         pg.display.quit()
         pg.display.init()
-    logger.success(threading.current_thread())
+        logger.success(threading.current_thread())
+    else:  # switching to MainThread from others doesn't cause DeadLock
+        logger.debug(threading.current_thread())
     return pg.display.set_mode(*args, **kwargs)
 
 def center():
