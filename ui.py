@@ -1,6 +1,6 @@
 from itertools import count
 from window import *
-from button import *
+from base import *
 from loguru import logger
 
 
@@ -13,6 +13,21 @@ hovering = pressed = None
 num = 0
 
 
+def _reset_video_system(*args, **kwargs):
+    # pg.display.quit()
+    pg.quit()
+    pg.init()
+    # pg.display.init()
+    return pg.display.set_mode(*args, **kwargs)
+
+def _check_threading():
+    import threading
+    if threading.current_thread().name != 'MainThread':
+        logger.critical(threading.current_thread())
+        global clock, screen
+        screen = _reset_video_system(size, flags | pg.SHOWN, vsync=True)
+        clock = pg.time.Clock()
+
 def switch_to(window:Window):
     global screen, scene
 
@@ -22,12 +37,12 @@ def switch_to(window:Window):
     scene = window
 
     if window is None:
-        screen = pg.display.set_mode(size, flags | pg.HIDDEN)
+        screen = _reset_video_system(size, flags | pg.HIDDEN)
         return size.clear()
 
     if window.size != size:
         size[:] = window.size
-        screen = pg.display.set_mode(size, flags | pg.SHOWN, vsync=True)
+        screen = _reset_video_system(size, flags | pg.SHOWN, vsync=True)
         screen.blit(window.canvas, (0,0))
     window.canvas = screen
     window.shown = True
@@ -159,6 +174,7 @@ display_fps = True
 title = "FPgui"
 
 def main_loop():
+    _check_threading()
     if scene is None:
         return logger.error("no window on scene")
     global num

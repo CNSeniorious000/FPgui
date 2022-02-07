@@ -3,6 +3,8 @@ from collections import deque
 import numpy as np
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 os.environ['SDL_VIDEO_CENTERED'] = '1'
+os.environ['PYGAME_BLEND_ALPHA_SDL2'] = '1'
+os.environ['PYGAME_FORCE_SCALE'] = 'photo'
 SF = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 display_size = list(map(win32api.GetSystemMetrics, (0,1)))
 import pygame as pg
