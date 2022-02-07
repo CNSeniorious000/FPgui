@@ -1,5 +1,6 @@
 from base import *
 from itertools import count
+from functools import wraps
 from window import *
 from loguru import logger
 import threading
@@ -14,16 +15,19 @@ hovering = pressed = None
 num = 0
 
 
+@wraps(pg.display.set_mode)
 def _reset_video_system(*args, **kwargs):
     if threading.current_thread().name != 'MainThread':
         pg.display.quit()
         pg.display.init()
-        logger.success(threading.current_thread())
+    logger.success(threading.current_thread())
     return pg.display.set_mode(*args, **kwargs)
 
-def _check_threading():
-    if threading.current_thread().name != 'MainThread':
-        switch_to(scene)
+def center():
+    hWnd = pg.display.get_wm_info()["window"]
+    X, Y = DSIZE
+    x, y = size
+    ctypes.windll.user32.MoveWindow(hWnd, (X-x)//2, (Y-y)//2, x, y, False)
 
 def switch_to(window:Window):
     global screen, scene
@@ -40,17 +44,12 @@ def switch_to(window:Window):
     if window.size != size:
         size[:] = window.size
         screen = _reset_video_system(size, flags | pg.SHOWN, vsync=True)
-        screen.blit(window.canvas, (0,0))
+    screen.blit(window.canvas, (0,0))
+    pg.display.flip()
     window.canvas = screen
     window.shown = True
 
     return Action.scene_changed
-
-def center():
-    hWnd = pg.display.get_wm_info()["window"]
-    X, Y = DSIZE
-    x, y = size
-    ctypes.windll.user32.MoveWindow(hWnd, (X-x)//2, (Y-y)//2, x, y, False)
 
 def use(window:Window, centering=True):
     if window is scene:
@@ -59,8 +58,6 @@ def use(window:Window, centering=True):
 
     if centering:
         center()
-
-    pg.display.flip()
 
     return Action.scene_changed
 
@@ -171,7 +168,6 @@ display_fps = True
 title = "FPgui"
 
 def main_loop():
-    _check_threading()
     if scene is None:
         return logger.error("no window on scene")
     global num
@@ -182,7 +178,6 @@ def main_loop():
     for num in count(num):
         # parse all events
         for event in pg.event.get():
-            print(f"{event = }")
             if event.type == pg.QUIT:
                 return hide()
             else:
@@ -213,17 +208,14 @@ def main_loop():
 
                 if Action.break_loop in ans:
                     return hide()
-            
-        # clear
-        if render_group:
-            on_clear(scene)
-
+ 
         # update
         if logic_group:
             logic_group.update()
-
-        # render
+           
+        # clear & render
         if render_group:
+            on_clear(scene)
             pg.display.update(render_group.draw(screen))
 
         # tick
