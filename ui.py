@@ -73,6 +73,8 @@ def hide(clear=True):
     return Action.break_loop
 
 def parse_mouse_pos(pos):
+    if pos is None:
+        logger.error("mouse position is None")
     global hovering
     for widget in scene.logic_group:
         widget: pg.sprite.Sprite
@@ -81,6 +83,10 @@ def parse_mouse_pos(pos):
         except AttributeError:
             continue
 
+        if rect is None:
+            logger.warning("rect is None")
+            continue
+        
         if rect.collidepoint(pos):
             if widget is hovering:
                 return
@@ -229,17 +235,12 @@ def main_loop():
 
 @contextlib.contextmanager
 def make_window(x, y, bgd=None):
-    try:
-        use(window:=Window(x, y, bgd))
-        yield window
-    finally:
-        main_loop()
+    use(window:=Window(x, y, bgd))
+    yield window
+    main_loop()
 
 @contextlib.contextmanager
 def make_async_window(x, y, bgd=None):
     window = Window(x, y, bgd)
-    try:
-        threading.Thread(target=lambda: use(window) and main_loop()).start()
-        yield window
-    finally:
-        pass
+    threading.Thread(target=lambda: use(window) and main_loop()).start()
+    yield window
