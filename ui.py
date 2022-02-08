@@ -234,13 +234,12 @@ def main_loop():
 # advanced staffs
 
 @contextlib.contextmanager
-def make_window(x, y, bgd=None):
-    use(window:=Window(x, y, bgd))
+def using(window:Window):
+    use(window)
     yield window
     main_loop()
 
 @contextlib.contextmanager
-def make_async_window(x, y, bgd=None):
-    window = Window(x, y, bgd)
+def using_async(window:Window):
     threading.Thread(target=lambda: use(window) and main_loop()).start()
     yield window

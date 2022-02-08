@@ -9,7 +9,7 @@
 import ui, time
 from label import Label, Monitor
 
-with ui.make_async_window(1280, 720, 0) as window:
+with ui.using_async(ui.Window(1280, 720, 0)):
     Monitor(time.ctime, (80,80), ui.Align.top_left, 18, (0,255,255), cache=False)
     Monitor(lambda: f"FPS: {ui.clock.get_fps():.1f}", (1200, 80), ui.Align.top_right, 18, (255,0,255))
     rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640,360), ui.Align.center, 22, (0,255,0))
