@@ -1,5 +1,7 @@
 # FPgui —— 空前的GUI框架
 
+![](logo.svg)
+
 > 大量使用Python3.9的海象赋值符，少量使用Python3.10的match-case语法。体验该仓库时请注意解释器版本
 
 ## Getting Start
