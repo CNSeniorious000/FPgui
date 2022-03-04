@@ -11,7 +11,7 @@ clock = pg.time.Clock()
 flags = pg.NOFRAME | pg.SCALED
 size = []
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
-scene: Window = None
+scene: Window | None = None
 hovering = pressed = None
 num = 0
 
@@ -100,10 +100,10 @@ def parse_mouse_pos(pos):
                 widget.situation = Situation.hovering
             hovering = widget
             return  # 假定同时只会hover一个
-    else:
-        if hovering is not None:
-            hovering.situation = Situation.standby
-            hovering = None
+
+    if hovering is not None:
+        hovering.situation = Situation.standby
+        hovering = None
 
 def parse_event(event):
     global pressed
@@ -232,6 +232,15 @@ def main_loop():
             pg.display.set_caption(f"{title} @ {1000/_ :.2f}")
 
 # advanced staffs
+
+current_parrent = scene
+
+@contextlib.contextmanager
+def using(widget):
+    global current_parrent
+    last, current_parrent = current_parrent, widget
+    yield
+    current_parrent = last
 
 @contextlib.contextmanager
 def using(window:Window):
