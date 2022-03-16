@@ -233,14 +233,14 @@ def main_loop():
 
 # advanced staffs
 
-current_parrent = scene
+current_parent = scene
 
 @contextlib.contextmanager
 def using(widget):
-    global current_parrent
-    last, current_parrent = current_parrent, widget
-    yield
-    current_parrent = last
+    global current_parent
+    last, current_parent = current_parent, widget
+    yield widget
+    current_parent = last
 
 @contextlib.contextmanager
 def using(window:Window):
@@ -248,7 +248,6 @@ def using(window:Window):
     yield window
     main_loop()
 
-@contextlib.contextmanager
 def using_async(window:Window):
     threading.Thread(target=lambda: use(window) and main_loop()).start()
-    yield window
+    return window
