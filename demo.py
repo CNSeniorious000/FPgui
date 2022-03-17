@@ -9,7 +9,7 @@ rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640
 Monitor(rand.get_surface.inspect, (640, 80), ui.Align.mid_top, 15, (0,255,0), cache=False)
 
 Label("\n".join(i.strip() for i in """
-Hi! I'm a static label which never refreash.
+Hi! I'm a static label which never refresh.
 Labels around me called 'Monitors' showed its main usages:
 · The top-left one is the auto-refresh clock,
 · The top-right one is the fps display,

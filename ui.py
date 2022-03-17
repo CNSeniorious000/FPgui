@@ -8,7 +8,7 @@ import contextlib
 
 
 clock = pg.time.Clock()
-flags = pg.NOFRAME | pg.SCALED
+flags = pg.NOFRAME
 size = []
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
 scene: Window | None = None
@@ -84,7 +84,7 @@ def parse_mouse_pos(pos):
             continue
 
         if rect is None:
-            logger.warning("rect is None")
+            logger.warning(f"{widget}.rect is None")
             continue
         
         if rect.collidepoint(pos):
