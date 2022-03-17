@@ -11,7 +11,6 @@ clock = pg.time.Clock()
 flags = pg.NOFRAME
 size = []
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
-scene: Window | None = None
 hovering = pressed = None
 num = 0
 
@@ -32,12 +31,12 @@ def center():
     ctypes.windll.user32.MoveWindow(hWnd, (X-x)//2, (Y-y)//2, x, y, False)
 
 def switch_to(window:Window):
-    global screen, scene
+    global screen
 
-    if scene is not None:
+    if (scene := Window.current) is not None:
         scene.shown = False
         scene.canvas = scene.canvas.copy()
-    scene = window
+    Window.current = window
 
     if window is None:
         screen = _reset_video_system(size, flags | pg.HIDDEN)
@@ -54,7 +53,7 @@ def switch_to(window:Window):
     return Action.scene_changed
 
 def use(window:Window, centering=True):
-    if window is scene:
+    if window is Window.current:
         return logger.warning(f"<{window = }> on scene")
     switch_to(window)
 
@@ -64,10 +63,10 @@ def use(window:Window, centering=True):
     return Action.scene_changed
 
 def hide(clear=True):
-    if scene is None:
+    if Window.current is None:
         return logger.error("window is already hidden")
     if clear:
-        scene.queue.clear()
+        Window.current.queue.clear()
     use(None, False)
 
     return Action.break_loop
@@ -76,7 +75,7 @@ def parse_mouse_pos(pos):
     if pos is None:
         logger.error("mouse position is None")
     global hovering
-    for widget in scene.logic_group:
+    for widget in Window.current.logic_group:
         widget: pg.sprite.Sprite
         try:
             rect = widget.rect
@@ -176,7 +175,7 @@ display_fps = True
 title = "FPgui"
 
 def main_loop():
-    if scene is None:
+    if (scene := Window.current) is None:
         return logger.error("no window on scene")
     global num
     logic_group = scene.logic_group
@@ -231,9 +230,7 @@ def main_loop():
         if display_fps:
             pg.display.set_caption(f"{title} @ {1000/_ :.2f}")
 
-# advanced staffs
-
-current_parent = scene
+current_parent = Window.current
 
 @contextlib.contextmanager
 def using(widget):
@@ -242,12 +239,6 @@ def using(widget):
     yield widget
     current_parent = last
 
-@contextlib.contextmanager
-def using(window:Window):
-    use(window)
-    yield window
-    main_loop()
-
-def using_async(window:Window):
+def start_async(window:Window):
     threading.Thread(target=lambda: use(window) and main_loop()).start()
     return window

@@ -17,7 +17,7 @@ class Label(pg.sprite.Sprite):
             window: Window | None = None
     ):
         self.image = self.rect = None
-        self.window = get_window_using() if window is None else window
+        self.window = window or Window.current
         pg.sprite.Sprite.__init__(self, self.window.logic_group)
         self.text = text
         self.anchor = anchor
@@ -60,7 +60,7 @@ class Monitor(pg.sprite.Sprite):
             window: Window | None = None,
     ):
         self.last = self.image = self.rect = None
-        self.window = get_window_using() if window is None else window
+        self.window = window or Window.current
         pg.sprite.Sprite.__init__(self, self.window.logic_group)
 
         self.entity = entity

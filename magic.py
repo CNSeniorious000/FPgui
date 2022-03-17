@@ -336,11 +336,3 @@ def get_PG_font(path, size):
     font.kerning = True
     font.pad = True
     return font
-
-def get_window_using():
-    import ui
-    return ui.scene
-
-def get_current_parent():
-    import ui
-    return ui.current_parent

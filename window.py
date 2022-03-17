@@ -1,4 +1,5 @@
 from base import *
+import ui
 from collections import deque
 import numpy as np
 import pygame as pg
@@ -11,6 +12,8 @@ def scaled(x):
 
 class Window:
     """cached scene or sub window"""
+    current: "Window" = None
+
     def __init__(self, x, y, bgd=None):
         self.size = [x, y]
         self.shown = False
@@ -22,7 +25,7 @@ class Window:
             case int(): pg.surfarray.pixels3d(buffer)[:] = bgd
             case None: pass
             case _: raise TypeError(f"{type(bgd) = }")
-        self.canvas = self.bgd = buffer  # .convert()
+        self.canvas = self.bgd = buffer.convert()
 
         self.widgets = deque()
         self.queue = deque()
@@ -31,3 +34,7 @@ class Window:
 
     def __repr__(self):
         return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
+
+    @property
+    def on_scene(self):
+        return Window.current is self
