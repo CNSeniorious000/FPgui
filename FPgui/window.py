@@ -1,7 +1,9 @@
-from . import Align, pg, scaled
+from . import Align, scaled
 from .layout import MinimizedContainer
+from contextlib import contextmanager
 from collections import deque
 import numpy as np
+import pygame as pg
 
 
 class Window(MinimizedContainer):
@@ -28,6 +30,16 @@ class Window(MinimizedContainer):
 
     def __repr__(self):
         return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
+
+    @property
+    @contextmanager
+    def using(self, relocation=True):
+        from .ui import use, main_loop
+        use(self, relocation)
+        yield self.__enter__()
+        print(f"{self.children = }")
+        main_loop()
+        self.__exit__(None, None, None)
 
     def use(self, relocation=True):
         from .ui import use

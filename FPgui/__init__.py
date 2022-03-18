@@ -1,4 +1,4 @@
-import os, enum, ctypes, win32api, pygame as pg
+import os, enum, ctypes, win32api
 os.environ['NUMBA_NUM_THREADS'] = '1'  # disable multiprocessing
 os.environ['SDL_VIDEO_CENTERED'] = '1'  # enable first centering
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable ads
@@ -49,7 +49,7 @@ class Align(enum.IntFlag):
         return x, y
 
 
-def locate(rect:pg.Rect, align:Align, anchor) -> pg.Rect:
+def locate(rect, align:Align, anchor):
     match align:
         case Align.top_left: rect.topleft = anchor
         case Align.mid_top: rect.midtop = anchor

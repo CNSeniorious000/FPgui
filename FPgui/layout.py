@@ -1,6 +1,5 @@
 from . import *
 from collections import deque
-from loguru import logger
 
 
 class MinimizedContainer(Widget):
@@ -18,15 +17,14 @@ class MinimizedContainer(Widget):
 
     def __enter__(self):
         from . import ui
-        self.tmp, ui.current_parent = ui.current_parent, self
+        self.__tmp, ui.current_parent = ui.current_parent, self
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         from . import ui
-        ui.current_parent = self.tmp
-        del self.tmp
+        ui.current_parent = self.__tmp
+        del self.__tmp
 
-    @logger.catch()
     def check(self, recursive=False):
         return all(child.check() for child in self) if recursive else \
             all(child.parent is self for child in self)

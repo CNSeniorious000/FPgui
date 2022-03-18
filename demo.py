@@ -1,5 +1,5 @@
 import time
-from FPgui import ui
+from FPgui import ui, Align
 from FPgui.label import Label, Monitor
 
 # import FPgui as fp
@@ -7,8 +7,7 @@ from FPgui.label import Label, Monitor
 # ui.efficient = False
 
 
-with ui.Window(1280, 720, bgd=0) as window:
-    window.use_async()
+with ui.Window(1280, 720, Align.top_left, (300,300), bgd=0).using as window:
     Monitor(time.ctime, (80,80), ui.Align.top_left, 20, (0, 255, 255), cache=False)
     Monitor(lambda: f"FPS: {ui.clock.get_fps():.1f}", (1200, 80), ui.Align.top_right, 20, (255, 0, 255))
     rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640,360), ui.Align.center, 24, (0, 255, 0))
@@ -23,3 +22,4 @@ with ui.Window(1280, 720, bgd=0) as window:
     Hope you enjoy the great performance and pythonic charm!
     """.strip().split("\n")) +"\n", (420, 672), ui.Align.bottom_left, 12, (255,) * 3)
     assert window.check(recursive=True)
+    print(ui.Window.current)
