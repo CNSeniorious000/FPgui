@@ -1,5 +1,6 @@
 from . import *
 from collections import deque
+from loguru import logger
 
 
 class MinimizedContainer(Widget):
@@ -25,10 +26,10 @@ class MinimizedContainer(Widget):
         ui.current_parent = self.tmp
         del self.tmp
 
+    @logger.catch()
     def check(self, recursive=False):
-        if isinstance(self.parent, MinimizedContainer) and self in self.parent:
-            return all(child.check() for child in self) if recursive else \
-                all(child.parent is self for child in self)
+        return all(child.check() for child in self) if recursive else \
+            all(child.parent is self for child in self)
 
     def append(self, widget:Widget):
         assert isinstance(widget, Widget)

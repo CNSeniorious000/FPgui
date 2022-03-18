@@ -8,9 +8,9 @@ class Window(MinimizedContainer):
     """cached scene or sub window"""
     current: "Window" = None
 
-    def __init__(self, w, h, bgd=None, align=Align.center, x=None, y=None):
+    def __init__(self, w, h, align=Align.center, anchor=(None,None), bgd=None):
         self.size = [scaled(w), scaled(h)]
-        MinimizedContainer.__init__(self, align, (x, y), window=self)
+        MinimizedContainer.__init__(self, align, anchor, window=self)
         self.shown = False
         buffer = pg.Surface(self.size)
         match bgd:
@@ -28,10 +28,6 @@ class Window(MinimizedContainer):
 
     def __repr__(self):
         return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
-
-    @property
-    def on_scene(self):
-        return Window.current is self
 
     def use(self, relocation=True):
         from .ui import use

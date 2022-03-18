@@ -6,7 +6,8 @@ from typing import Any
 
 
 class Label(Widget, pg.sprite.Sprite):
-    def __init__(self,
+    def __init__(
+            self,
             text: Any,
             anchor: tuple[int,int],
             align: Align = Align.center,
