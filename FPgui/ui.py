@@ -29,7 +29,8 @@ def relocate():
     W, H = DSIZE
     w, h = size
     X, Y = anchor
-    x, y = scene.align.translate_to_top_left(*scene.anchor, w, h)
+    x, y = scene.align.translate_to_top_left(*Align.normalize(*scene.anchor, W, H), w, h)
+    logger.debug(f"locating {scene}'s {scene.align.name} to ({x},{y})")
     ctypes.windll.user32.MoveWindow(
         hWnd, x or X or (W - w) // 2, y or Y or (H - h) // 2, w, h, False
     )

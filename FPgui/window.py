@@ -31,13 +31,11 @@ class Window(MinimizedContainer):
     def __repr__(self):
         return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
 
-    @property
     @contextmanager
     def using(self, relocation=True):
         from .ui import use, main_loop
         use(self, relocation)
         yield self.__enter__()
-        print(f"{self.children = }")
         main_loop()
         self.__exit__(None, None, None)
 

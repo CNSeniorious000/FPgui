@@ -48,6 +48,10 @@ class Align(enum.IntFlag):
                 y -= h
         return x, y
 
+    @staticmethod
+    def normalize(x, y, W, H):
+        return x and x % W, y and y % H
+
 
 def locate(rect, align:Align, anchor):
     match align:
