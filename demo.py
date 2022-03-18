@@ -2,8 +2,9 @@ import time
 from FPgui import ui
 from FPgui.label import Label, Monitor
 
-import FPgui as fp
-# fp.SCALE = False
+# import FPgui as fp
+# fp.DO_SCALE = False
+# ui.efficient = False
 
 
 ui.start_async(ui.Window(1280, 720, 0))

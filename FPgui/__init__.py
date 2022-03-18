@@ -1,19 +1,16 @@
-import os, enum, ctypes, win32api
+import os, enum, ctypes, win32api, pygame as pg
 os.environ['NUMBA_NUM_THREADS'] = '1'  # disable multiprocessing
 os.environ['SDL_VIDEO_CENTERED'] = '1'  # enable first centering
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable ad
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable ads
 os.environ['PYGAME_BLEND_ALPHA_SDL2'] = '1'  # enable blend
 ctypes.windll.user32.SetProcessDPIAware(2)
 SF = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 DSIZE = list(map(win32api.GetSystemMetrics, (0,1)))
-
-
-SCALE = True
+DO_SCALE = True
 
 
 def scaled(x):
-    if SCALE:
-        print(f"{x = }")
+    if DO_SCALE:
         assert x % 4 == 0
         return x * SF // 100
     else:
@@ -39,7 +36,7 @@ class Align(enum.IntFlag):
     bottom_right = max_x | max_y  # 右下
 
 
-def locate(rect, align:Align, anchor):
+def locate(rect:pg.Rect, align:Align, anchor) -> pg.Rect:
     match align:
         case Align.top_left: rect.topleft = anchor
         case Align.mid_top: rect.midtop = anchor
@@ -105,3 +102,30 @@ class Blend(enum.Enum):
     # a < 0.5 -> min(2a, b)
     # a = 0.5 -> b
     # a > 0.5 -> max(2(a-0.5), b)
+
+
+from . import ui
+from .window import *
+
+class MinimizedWidget:
+    """any widget with a certain location"""
+
+    def __init__(self, align:Align, x, y):
+        self.align = align
+        self.anchor = (scaled(x), scaled(y))
+
+    def get_rect(self, surface):
+        return locate(surface.get_rect(), self.align, self.anchor)
+
+    @property
+    def align_v(self):
+        return {1:"left", 2:"center", 4:"right"}[self.align >> 3]
+
+        
+class Widget(MinimizedWidget):
+    """widget in someplace"""
+
+    def __init__(self, align, x, y, window=None, parent=None):
+        MinimizedWidget.__init__(self, align, x, y)
+        self.window = window or Window.current
+        self.parent = parent or ui.current_parent
