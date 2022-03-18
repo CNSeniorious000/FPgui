@@ -4,16 +4,14 @@ from itertools import count
 from functools import wraps
 from loguru import logger
 import threading
-import contextlib
 
 
-clock = pg.time.Clock()
 flags = pg.NOFRAME
 size = []  # last window's size
 anchor = [None, None]  # last window's anchor
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
 hovering = pressed = None
-num = 0
+current_parent: "MinimizedContainer" = None
 
 
 @wraps(pg.display.set_mode)
@@ -177,10 +175,12 @@ def on_clear(window:Window, heuristic=False):
             case Strategy.whole: return clear_whole(window)
             case _: raise ValueError(type(clear_strategy), clear_strategy)
 
+clock = pg.time.Clock()
 target = 60
 efficient = True
 display_fps = True
 title = "FPgui"
+num = 0
 
 def main_loop():
     if (scene := Window.current) is None:
@@ -238,15 +238,6 @@ def main_loop():
         if display_fps:
             pg.display.set_caption(f"{title} @ {1000/_ :.2f}")
 
-current_parent = Window.current
-
-@contextlib.contextmanager
-def using(widget):
-    global current_parent
-    last, current_parent = current_parent, widget
-    yield widget
-    current_parent = last
-
-def start_async(window:Window):
-    threading.Thread(target=lambda: use(window) and main_loop()).start()
-    return window
+def use_async(window:Window, relocation=True):
+    threading.Thread(target=lambda: use(window, relocation) and main_loop()).start()
+    return Action.scene_changed

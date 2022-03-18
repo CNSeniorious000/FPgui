@@ -132,7 +132,7 @@ class MinimizedWidget:
     def align_v(self):
         return {1:"left", 2:"center", 4:"right"}[self.align >> 3]
 
-        
+
 class Widget(MinimizedWidget):
     """widget in someplace"""
 
@@ -141,3 +141,10 @@ class Widget(MinimizedWidget):
         from . import ui
         self.window = window or ui.Window.current
         self.parent = parent or ui.current_parent
+        try:
+            self.parent.children.append(self)
+        except AttributeError:
+            assert self.window is self
+
+    def check(self):
+        return self in self.parent

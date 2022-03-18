@@ -15,11 +15,21 @@ class MinimizedContainer(Widget):
     def __iter__(self):
         return iter(self.children)
 
+    def __enter__(self):
+        from . import ui
+        self.tmp, ui.current_parent = ui.current_parent, self
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        from . import ui
+        ui.current_parent = self.tmp
+        del self.tmp
+
     def check(self, recursive=False):
         if isinstance(self.parent, MinimizedContainer) and self in self.parent:
-            return all(child.parent is self for child in self) if recursive else \
-                all(child.check() for child in self)
+            return all(child.check() for child in self) if recursive else \
+                all(child.parent is self for child in self)
 
-    def add(self):
-        pass
-
+    def append(self, widget:Widget):
+        assert isinstance(widget, Widget)
+        self.children.append(widget)

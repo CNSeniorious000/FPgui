@@ -33,6 +33,10 @@ class Window(MinimizedContainer):
     def on_scene(self):
         return Window.current is self
 
-    def use(self):
-        from ui import use
-        use(self)
+    def use(self, relocation=True):
+        from .ui import use
+        return use(self, relocation)
+
+    def use_async(self, relocation=True):
+        from .ui import use_async
+        return use_async(self, relocation)
