@@ -7,10 +7,6 @@ import threading
 import contextlib
 
 
-def scaled(x):
-    assert x % 4 == 0
-    return x * SF // 100
-
 clock = pg.time.Clock()
 flags = pg.NOFRAME
 size = []

@@ -20,9 +20,9 @@ class Label(pg.sprite.Sprite):
         self.window = window or Window.current
         pg.sprite.Sprite.__init__(self, self.window.logic_group)
         self.text = text
-        self.anchor = anchor
+        self.anchor = tuple(map(scaled, anchor))
         self.align = align
-        self.font_size = font_size
+        self.font_size = scaled(font_size)
         self.font_color = font_color
         self.font_path = font_path
         self.subpixel = subpixel
@@ -65,10 +65,10 @@ class Monitor(pg.sprite.Sprite):
 
         self.entity = entity
 
-        self.anchor = anchor
+        self.anchor = tuple(map(scaled, anchor))
         self.align = align
 
-        self.font_size = font_size
+        self.font_size = font_size = scaled(font_size)
         self.font_color = font_color
         self.font_path = font_path
 

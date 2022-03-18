@@ -8,6 +8,17 @@ SF = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 DSIZE = list(map(win32api.GetSystemMetrics, (0,1)))
 
 
+SCALE = True
+
+
+def scaled(x):
+    if SCALE:
+        print(f"{x = }")
+        assert x % 4 == 0
+        return x * SF // 100
+    else:
+        return x
+
 
 class Align(enum.IntFlag):
     min_y = top    = enum.auto()

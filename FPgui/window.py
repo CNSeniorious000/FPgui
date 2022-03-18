@@ -10,9 +10,9 @@ class Window:
     current: "Window" = None
 
     def __init__(self, x, y, bgd=None):
-        self.size = [x, y]
+        self.size = [scaled(x), scaled(y)]
         self.shown = False
-        buffer = pg.Surface((x, y))
+        buffer = pg.Surface(self.size)
         match bgd:
             case pg.Surface(): buffer.blit(bgd, (0, 0))
             case np.ndarray(ndim=3): pg.surfarray.blit_array(buffer, bgd)
