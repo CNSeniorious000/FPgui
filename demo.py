@@ -19,6 +19,6 @@ Labels around me called 'Monitors' showed its main usages:
 · The top-left one is the auto-refresh clock,
 · The top-right one is the fps display,
 · The center one is a always-updating random number generator,
-· And the mid-top one shows its caching infomation.
+· And the mid-top one shows its caching information.
 Hope you enjoy the great performance and pythonic charm!
 """.strip().split("\n")) +"\n", (420, 672), ui.Align.bottom_left, 12, (255,) * 3)

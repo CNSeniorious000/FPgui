@@ -1,15 +1,16 @@
-from . import *
+from . import Align, pg, scaled
+from .layout import MinimizedContainer
 from collections import deque
 import numpy as np
 
 
-
-class Window:
+class Window(MinimizedContainer):
     """cached scene or sub window"""
     current: "Window" = None
 
-    def __init__(self, x, y, bgd=None):
-        self.size = [scaled(x), scaled(y)]
+    def __init__(self, w, h, bgd=None, align=Align.center, x=None, y=None):
+        self.size = [scaled(w), scaled(h)]
+        MinimizedContainer.__init__(self, align, (x, y), window=self)
         self.shown = False
         buffer = pg.Surface(self.size)
         match bgd:
@@ -21,7 +22,6 @@ class Window:
             case _: raise TypeError(f"{type(bgd) = }")
         self.canvas = self.bgd = buffer.convert()
 
-        self.widgets = deque()
         self.queue = deque()
         self.logic_group = pg.sprite.Group()
         self.render_group = pg.sprite.RenderUpdates()
@@ -32,3 +32,7 @@ class Window:
     @property
     def on_scene(self):
         return Window.current is self
+
+    def use(self):
+        from ui import use
+        use(self)

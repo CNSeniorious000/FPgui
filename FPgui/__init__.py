@@ -35,6 +35,19 @@ class Align(enum.IntFlag):
     bottom_left  = min_x | max_y  # 左下
     bottom_right = max_x | max_y  # 右下
 
+    def translate_to_top_left(self, x, y, w, h):
+        if x is not None:
+            if Align.mid_x in self:
+                x -= w // 2
+            elif Align.max_x in self:
+                x -= w
+        if y is not None:
+            if Align.mid_y in self:
+                y -= h // 2
+            elif Align.max_y in self:
+                y -= h
+        return x, y
+
 
 def locate(rect:pg.Rect, align:Align, anchor) -> pg.Rect:
     match align:
@@ -104,15 +117,13 @@ class Blend(enum.Enum):
     # a > 0.5 -> max(2(a-0.5), b)
 
 
-from . import ui
-from .window import *
 
 class MinimizedWidget:
     """any widget with a certain location"""
 
     def __init__(self, align:Align, x, y):
         self.align = align
-        self.anchor = (scaled(x), scaled(y))
+        self.anchor = x and scaled(x), y and scaled(y)
 
     def get_rect(self, surface):
         return locate(surface.get_rect(), self.align, self.anchor)
@@ -127,5 +138,6 @@ class Widget(MinimizedWidget):
 
     def __init__(self, align, x, y, window=None, parent=None):
         MinimizedWidget.__init__(self, align, x, y)
-        self.window = window or Window.current
+        from . import ui
+        self.window = window or ui.Window.current
         self.parent = parent or ui.current_parent

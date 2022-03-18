@@ -9,7 +9,8 @@ import contextlib
 
 clock = pg.time.Clock()
 flags = pg.NOFRAME
-size = []
+size = []  # last window's size
+anchor = [None, None]  # last window's anchor
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
 hovering = pressed = None
 num = 0
@@ -24,11 +25,16 @@ def _reset_video_system(*args, **kwargs):
     # switching to MainThread from others doesn't cause DeadLock
     return pg.display.set_mode(*args, **kwargs)
 
-def center():
+def relocate():
     hWnd = pg.display.get_wm_info()["window"]
-    X, Y = DSIZE
-    x, y = size
-    ctypes.windll.user32.MoveWindow(hWnd, (X-x)//2, (Y-y)//2, x, y, False)
+    scene = Window.current
+    W, H = DSIZE
+    w, h = size
+    X, Y = anchor
+    x, y = scene.align.translate_to_top_left(*scene.anchor, w, h)
+    ctypes.windll.user32.MoveWindow(
+        hWnd, x or X or (W - w) // 2, y or Y or (H - h) // 2, w, h, False
+    )
 
 def switch_to(window:Window):
     global screen
@@ -40,6 +46,7 @@ def switch_to(window:Window):
 
     if window is None:
         screen = _reset_video_system(size, flags | pg.HIDDEN)
+        anchor[:] = None, None
         return size.clear()
 
     if window.size != size:
@@ -52,13 +59,14 @@ def switch_to(window:Window):
 
     return Action.scene_changed
 
-def use(window:Window, centering=True):
+def use(window:Window, relocation=True):
     if window is Window.current:
         return logger.warning(f"<{window = }> on scene")
     switch_to(window)
 
-    if centering:
-        center()
+    if relocation:
+        relocate()
+        anchor[:] = window.anchor
 
     return Action.scene_changed
 

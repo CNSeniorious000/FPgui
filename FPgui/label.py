@@ -1,4 +1,5 @@
 from . import *
+from .window import *
 from .magic import *
 from .config import *
 from typing import Any
