@@ -1,4 +1,4 @@
-from base import *
+from . import *
 import pickle, bz2
 from functools import cache, singledispatchmethod
 import numpy as np

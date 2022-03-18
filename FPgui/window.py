@@ -1,13 +1,8 @@
-from base import *
-import ui
+from . import *
 from collections import deque
 import numpy as np
 import pygame as pg
 
-
-def scaled(x):
-    assert x % 4 == 0
-    return x * SF // 100
 
 
 class Window:

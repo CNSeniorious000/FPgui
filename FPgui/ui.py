@@ -1,11 +1,15 @@
-from base import *
+from . import *
+from .window import *
 from itertools import count
 from functools import wraps
-from window import *
 from loguru import logger
 import threading
 import contextlib
 
+
+def scaled(x):
+    assert x % 4 == 0
+    return x * SF // 100
 
 clock = pg.time.Clock()
 flags = pg.NOFRAME

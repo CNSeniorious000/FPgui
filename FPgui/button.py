@@ -1,5 +1,6 @@
-from magic import *
-from base import *
+from . import *
+from .magic import *
+
 import pygame as pg
 from typing import Callable, Sequence, Dict, Tuple, Optional
 from collections import deque

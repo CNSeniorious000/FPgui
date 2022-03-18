@@ -1,7 +1,7 @@
-from base import *
-from magic import *
-from window import *
-from config import *
+from . import *
+from .magic import *
+from .window import *
+from .config import *
 from typing import Any
 
 

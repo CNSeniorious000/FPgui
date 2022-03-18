@@ -1,4 +1,4 @@
-from base import *
+from . import *
 import numpy as np
 import pygame as pg
 

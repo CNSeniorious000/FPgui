@@ -1,6 +1,6 @@
 # FPgui —— 空前的GUI框架
 
-![](logo.svg)
+![](others/logo.svg)
 
 > 大量使用Python3.9的海象赋值符，少量使用Python3.10的match-case语法。体验该仓库时请注意解释器版本
 
@@ -10,14 +10,16 @@
 - 以下五行代码是一个简单而华丽的demo
 
 ```python
-import ui, time
+import time
+from FPgui import ui
 from label import Label, Monitor
 
 with ui.using_async(ui.Window(1280, 720, 0)):
-    Monitor(time.ctime, (80,80), ui.Align.top_left, 18, (0,255,255), cache=False)
-    Monitor("pg.mouse.get_pos()", (1200, 80), ui.Align.top_right, 18, (255,0,255))
-    rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640,360), ui.Align.center, 22, (0,255,0))
-    Monitor(rand.get_surface.inspect, (640, 640), ui.Align.mid_bottom, 15, (255,255,255), cache=False)
+    Monitor(time.ctime, (80, 80), ui.Align.top_left, 18, (0, 255, 255), cache=False)
+    Monitor("pg.mouse.get_pos()", (1200, 80), ui.Align.top_right, 18, (255, 0, 255))
+    rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640, 360), ui.Align.center, 22,
+                   (0, 255, 0))
+    Monitor(rand.get_surface.inspect, (640, 640), ui.Align.mid_bottom, 15, (255, 255, 255), cache=False)
 ```
 
 - 上下文管理器`using_async`意味着事件循环运行在非主线程中(否则请使用`using`替代)，因此如果用 `ipython -i demo.py` 运行该脚本，你可以尝试在实时显示的同时更改界面
