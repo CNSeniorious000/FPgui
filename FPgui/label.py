@@ -17,10 +17,10 @@ class Label(Widget, pg.sprite.Sprite):
             subpixel: bool = True,
             window: Window | None = None
     ):
+        self.text = text
         Widget.__init__(self, align, *anchor, window)
         pg.sprite.Sprite.__init__(self, self.window.logic_group)
         self.image = self.rect = None
-        self.text = text
         self.anchor = tuple(map(scaled, anchor))
         self.align = align
         self.font_size = scaled(font_size)
@@ -29,6 +29,9 @@ class Label(Widget, pg.sprite.Sprite):
         self.subpixel = subpixel
 
         self.shown = False
+
+    def __repr__(self):
+        return f"Label(text={self.text!r})"
 
     def update(self):
         if self.shown:
@@ -59,11 +62,11 @@ class Monitor(Widget, pg.sprite.Sprite):
 
             window: Window | None = None,
     ):
+        self.entity = entity
         Widget.__init__(self, align, *anchor, window)
         pg.sprite.Sprite.__init__(self, self.window.logic_group)
 
         self.last = self.image = self.rect = None
-        self.entity = entity
 
         self.font_size = font_size = scaled(font_size)
         self.font_color = font_color
@@ -80,6 +83,8 @@ class Monitor(Widget, pg.sprite.Sprite):
         else:
             self.get_surface = get_surface
 
+    def __repr__(self):
+        return f"Monitor(entity={self.entity!r})"
 
     def update(self):
         entity = self.entity
@@ -98,6 +103,3 @@ class Monitor(Widget, pg.sprite.Sprite):
 
             self.image = surface = self.get_surface(str(this))
             self.rect = self.get_rect(surface)
-
-    def __repr__(self):
-        return f"Monitor(entity={self.entity})"

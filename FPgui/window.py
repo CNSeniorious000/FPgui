@@ -12,8 +12,9 @@ class Window(MinimizedContainer):
 
     def __init__(self, w, h, align=Align.center, anchor=(None,None), bgd=None):
         self.size = [scaled(w), scaled(h)]
-        MinimizedContainer.__init__(self, align, anchor, window=self)
         self.shown = False
+        MinimizedContainer.__init__(self, align, anchor, window=self)
+
         buffer = pg.Surface(self.size)
         match bgd:
             case pg.Surface(): buffer.blit(bgd, (0, 0))

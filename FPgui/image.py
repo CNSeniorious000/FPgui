@@ -1,3 +1,9 @@
+"""
+This file hasn't been used,
+but in the near future it'll be
+refactored and put into use.
+"""
+
 from . import *
 import numpy as np
 import pygame as pg

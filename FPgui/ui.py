@@ -23,17 +23,17 @@ def _reset_video_system(*args, **kwargs):
     # switching to MainThread from others doesn't cause DeadLock
     return pg.display.set_mode(*args, **kwargs)
 
+def move_window_to(x, y, w, h):
+    ctypes.windll.user32.MoveWindow(pg.display.get_wm_info()["window"], x, y, w, h, False)
+
 def relocate():
-    hWnd = pg.display.get_wm_info()["window"]
     scene = Window.current
     W, H = DSIZE
     w, h = size
     X, Y = anchor
     x, y = scene.align.translate_to_top_left(*Align.normalize(*scene.anchor, W, H), w, h)
     logger.debug(f"locating {scene}'s {scene.align.name} to ({x},{y})")
-    ctypes.windll.user32.MoveWindow(
-        hWnd, x or X or (W - w) // 2, y or Y or (H - h) // 2, w, h, False
-    )
+    move_window_to(x or X or (W - w) // 2, y or Y or (H - h) // 2, w, h)
 
 def switch_to(window:Window):
     global screen

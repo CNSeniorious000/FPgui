@@ -1,4 +1,9 @@
-from . import *
+"""
+This file holds some residual code,
+which implemented minimized support
+for other files but need huge refactoring.
+"""
+
 import pickle, bz2
 from functools import cache, singledispatchmethod
 import numpy as np
@@ -7,12 +12,16 @@ import pygame as pg
 from pygame import freetype; pg.init()
 from PIL import Image, ImageDraw, ImageFont
 from time import perf_counter as time
+from loguru import logger
 
 try:
     import blosc2 as blosc
+    logger.success(f"blosc2 v{blosc.__version__} imported")
     NOFILTER = blosc.Filter.NOFILTER
-except ImportError:
+except ImportError as err:
+    logger.error(err)
     import blosc
+    logger.success(f"blosc v{blosc.__version__} imported")
     NOFILTER = blosc.NOSHUFFLE
 finally:
     blosc.set_releasegil(True)
@@ -91,6 +100,9 @@ class memoize:
         self._func = function
         self._data = {}
         self._info = {"count": [0, 0], "time": [0., 0.]}
+
+    def __repr__(self):
+        return f"MemoizedFunction(func=<{self._func.__name__}>, len={len(self._data)})"
 
     def __call__(self, *args):
         t = time()

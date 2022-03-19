@@ -140,15 +140,21 @@ class MinimizedWidget:
 class Widget(MinimizedWidget):
     """widget in someplace"""
 
-    def __init__(self, align, x, y, window=None, parent=None):
+    def __init__(self, align, x, y, parent=None, window=None):
         MinimizedWidget.__init__(self, align, x, y)
         from . import ui
-        self.window = window or ui.Window.current
+        from loguru import logger
         self.parent = parent or ui.current_parent
+        self.window = window or ui.Window.current
         try:
-            self.parent.children.append(self)
+            self.parent.append(self)
+            logger.success(f"bound {self} to {self.parent}")
         except AttributeError:
-            assert self.window is self
+            if self.window is not self:
+                logger.warning(f"bound {self} to {self.parent}")
+
+    def __repr__(self):
+        return f"Widget(parent={self.parent}, window={self.window})"
 
     def check(self):
         return self in self.parent
