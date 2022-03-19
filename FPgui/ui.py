@@ -16,6 +16,7 @@ current_parent: "MinimizedContainer" = None
 
 @wraps(pg.display.set_mode)
 def _reset_video_system(*args, **kwargs):
+    logger.debug(f"resetting video system {args = }, {kwargs = }")
     if threading.current_thread().name != 'MainThread':
         pg.display.quit()
         pg.display.init()
@@ -36,6 +37,7 @@ def relocate():
     move_window_to(x or X or (W - w) // 2, y or Y or (H - h) // 2, w, h)
 
 def switch_to(window:Window):
+    logger.debug(f"switching to {window}")
     global screen
 
     if (scene := Window.current) is not None:
@@ -52,9 +54,7 @@ def switch_to(window:Window):
         size[:] = window.size
         screen = _reset_video_system(size, flags | pg.SHOWN, vsync=True)
     screen.blit(window.canvas, (0,0))
-    pg.display.flip()
     window.canvas = screen
-    window.shown = True
 
     return Action.scene_changed
 
@@ -66,6 +66,8 @@ def use(window:Window, relocation=True):
     if relocation:
         relocate()
         anchor[:] = window.anchor
+
+    pg.display.flip()
 
     return Action.scene_changed
 

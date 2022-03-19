@@ -1,13 +1,12 @@
 import time
-from FPgui import ui, Align
+from FPgui import ui, Align, scaling_at
 from FPgui.label import Label, Monitor
 
 # import FPgui as fp
 # fp.DO_SCALE = False
 # ui.efficient = False
 
-
-with ui.Window(1280, 720, Align.bottom_right, (-300,-300), bgd=0).using() as window:
+with scaling_at(200), ui.Window((1280, 720), Align.bottom_right, (-4,-4), bgd=0).using() as window:
     Monitor(time.ctime, (80,80), ui.Align.top_left, 20, (0, 255, 255), cache=False)
     Monitor(lambda: f"FPS: {ui.clock.get_fps():.1f}", (1200, 80), ui.Align.top_right, 20, (255, 0, 255))
     rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640,360), ui.Align.center, 24, (0, 255, 0))

@@ -5,8 +5,8 @@ from collections import deque
 class MinimizedContainer(Widget):
     """basic layout widget"""
 
-    def __init__(self, align, anchor, parent=None, window=None,):
-        Widget.__init__(self, align, *anchor, parent, window)
+    def __init__(self, w, h, align, x, y, parent=None, window=None, margin=0, spacing=0):
+        Widget.__init__(self, w, h, align, x, y, parent, window)
         self.children = deque()
 
     def __contains__(self, item):

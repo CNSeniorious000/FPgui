@@ -10,11 +10,8 @@ class Window(MinimizedContainer):
     """cached scene or sub window"""
     current: "Window" = None
 
-    def __init__(self, w, h, align=Align.center, anchor=(None,None), bgd=None):
-        self.size = [scaled(w), scaled(h)]
-        self.shown = False
-        MinimizedContainer.__init__(self, align, anchor, window=self)
-
+    def __init__(self, size, align=Align.center, anchor=(None,None), bgd=None):
+        MinimizedContainer.__init__(self, *scaled(size), align, *scaled(anchor), window=self)
         buffer = pg.Surface(self.size)
         match bgd:
             case pg.Surface(): buffer.blit(bgd, (0, 0))
@@ -30,7 +27,7 @@ class Window(MinimizedContainer):
         self.render_group = pg.sprite.RenderUpdates()
 
     def __repr__(self):
-        return "Window(size={}x{}, shown={})".format(*self.size, self.shown)
+        return "Window(size={}x{}, anchor=({},{}))".format(*self.size, *self.anchor)
 
     @contextmanager
     def using(self, relocation=True):

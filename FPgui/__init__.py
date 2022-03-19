@@ -1,4 +1,4 @@
-import os, enum, ctypes, win32api
+import os, enum, ctypes, win32api, contextlib
 os.environ['NUMBA_NUM_THREADS'] = '1'  # disable multiprocessing
 os.environ['SDL_VIDEO_CENTERED'] = '1'  # enable first centering
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable ads
@@ -6,15 +6,24 @@ os.environ['PYGAME_BLEND_ALPHA_SDL2'] = '1'  # enable blend
 ctypes.windll.user32.SetProcessDPIAware(2)
 SF = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 DSIZE = list(map(win32api.GetSystemMetrics, (0,1)))
-DO_SCALE = True
 
 
-def scaled(x):
-    if DO_SCALE:
-        assert x % 4 == 0
-        return x * SF // 100
+def scaled(val):
+    if SF:
+        try:
+            assert val is None or val % 4 == 0
+            return val and val * SF // 100
+        except TypeError:
+            return [v and v * SF // 100 for v in val]
     else:
-        return x
+        return val
+
+@contextlib.contextmanager
+def scaling_at(factor):
+    global SF
+    SF, factor = factor, SF
+    yield SF
+    SF = factor
 
 
 class Align(enum.IntFlag):
@@ -50,6 +59,7 @@ class Align(enum.IntFlag):
 
     @staticmethod
     def normalize(x, y, W, H):
+        """get positive x and y"""
         return x and x % W, y and y % H
 
 
@@ -125,12 +135,23 @@ class Blend(enum.Enum):
 class MinimizedWidget:
     """any widget with a certain location"""
 
-    def __init__(self, align:Align, x, y):
+    def __init__(self, w, h, align:Align, x, y):
+        self.w = w
+        self.h = h
         self.align = align
-        self.anchor = x and scaled(x), y and scaled(y)
+        self.x = x
+        self.y = y
+
+    @property
+    def size(self):
+        return self.w, self.h
+
+    @property
+    def anchor(self):
+        return self.x, self.y
 
     def get_rect(self, surface):
-        return locate(surface.get_rect(), self.align, self.anchor)
+        return locate(surface.get_rect(), self.align, (self.x, self.y))
 
     @property
     def align_v(self):
@@ -140,8 +161,8 @@ class MinimizedWidget:
 class Widget(MinimizedWidget):
     """widget in someplace"""
 
-    def __init__(self, align, x, y, parent=None, window=None):
-        MinimizedWidget.__init__(self, align, x, y)
+    def __init__(self, w, h, align, x, y, parent=None, window=None):
+        MinimizedWidget.__init__(self, w, h, align, x, y)
         from . import ui
         from loguru import logger
         self.parent = parent or ui.current_parent
