@@ -151,6 +151,7 @@ class MinimizedWidget:
         return self.x, self.y
 
     def get_rect(self, surface):
+        assert self.x and self.y
         return locate(surface.get_rect(), self.align, (self.x, self.y))
 
     @property

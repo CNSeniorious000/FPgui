@@ -30,11 +30,11 @@ class MinimizedContainer(Widget):
             all(child.parent is self for child in self)
 
     def append(self, widget:Widget):
-        assert isinstance(widget, Widget)
-        self.children.append(widget)
+        assert isinstance(widget, Widget) and widget not in self
+        return self.children.append(widget)
 
     def insert(self, index, widget:Widget):
-        assert isinstance(widget, Widget)
+        assert isinstance(widget, Widget) and widget not in self
         return self.children.insert(index, widget)
 
     def pop(self):

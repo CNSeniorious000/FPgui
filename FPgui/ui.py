@@ -24,8 +24,10 @@ def _reset_video_system(*args, **kwargs):
     # switching to MainThread from others doesn't cause DeadLock
     return pg.display.set_mode(*args, **kwargs)
 
-def move_window_to(x, y, w, h):
-    ctypes.windll.user32.MoveWindow(pg.display.get_wm_info()["window"], x, y, w, h, False)
+def move_window_to(x, y):
+    global anchor
+    anchor[:] = x, y
+    ctypes.windll.user32.MoveWindow(pg.display.get_wm_info()["window"], x, y, *size, False)
 
 def relocate():
     scene = Window.current
@@ -34,7 +36,7 @@ def relocate():
     X, Y = anchor
     x, y = scene.align.translate_to_top_left(*Align.normalize(*scene.anchor, W, H), w, h)
     logger.debug(f"locating {scene}'s {scene.align.name} to ({x},{y})")
-    move_window_to(x or X or (W - w) // 2, y or Y or (H - h) // 2, w, h)
+    move_window_to(x or X or (W - w) // 2, y or Y or (H - h) // 2)
 
 def switch_to(window:Window):
     logger.debug(f"switching to {window}")
@@ -47,7 +49,7 @@ def switch_to(window:Window):
 
     if window is None:
         screen = _reset_video_system(size, flags | pg.HIDDEN)
-        anchor[:] = None, None
+        anchor[:] = None, None  # after a hide(), not remember last anchor anymore
         return size.clear()
 
     if window.size != size:
@@ -65,7 +67,6 @@ def use(window:Window, relocation=True):
 
     if relocation:
         relocate()
-        anchor[:] = window.anchor
 
     pg.display.flip()
 
