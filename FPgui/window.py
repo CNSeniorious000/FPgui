@@ -1,17 +1,17 @@
 from . import Align, scaled
-from .layout import MinimizedContainer
+from .layout import Container
 from contextlib import contextmanager
 from collections import deque
 import numpy as np
 import pygame as pg
 
 
-class Window(MinimizedContainer):
+class Window(Container):
     """cached scene or sub window"""
     current: "Window" = None
 
     def __init__(self, size, anchor=(None,None), align=Align.center, bgd=None):
-        MinimizedContainer.__init__(self, *scaled(size), *scaled(anchor), align, window=self)
+        Container.__init__(self, *scaled(size), *scaled(anchor), align, window=self)
         buffer = pg.Surface(self.size)
         match bgd:
             case pg.Surface(): buffer.blit(bgd, (0, 0))

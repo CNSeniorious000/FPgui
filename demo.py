@@ -1,9 +1,7 @@
 import time
-from FPgui import ui, Align, scaling_at, Widget
+from FPgui import ui, Align, scaling_at
 from FPgui.label import Label, Monitor
 
-# import FPgui as fp
-# fp.DO_SCALE = False
 # ui.efficient = False
 
 with scaling_at(125), ui.Window((1280, 720), (-40,-40), Align.bottom_right, bgd=0).using(200) as window:

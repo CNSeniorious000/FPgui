@@ -11,7 +11,7 @@ size = []  # last window's size
 anchor = [None, None]  # last window's anchor
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
 hovering = pressed = None
-current_parent: "MinimizedContainer" = None
+current_parent: "Container" = None
 
 
 @wraps(pg.display.set_mode)
@@ -127,7 +127,7 @@ def parse_event(event):
                     pressed.situation = Situation.clicked
                 pressed = None
         case _:
-            pass
+            ...
 
 def on_lose_focus():
     global hovering, pressed

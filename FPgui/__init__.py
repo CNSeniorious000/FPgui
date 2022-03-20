@@ -131,26 +131,38 @@ class Blend(enum.Enum):
     # a > 0.5 -> max(2(a-0.5), b)
 
 
-
 class MinimizedWidget:
     """located widget (minimized for pickling)"""
 
-    def __init__(self, w, h, x, y, align:Align):
-        self.w = w
-        self.h = h
+    def __init__(self, w:int, h:int, x:int, y:int, align:Align):
+        self.w, self.h, self.x, self.y = w, h, x, y
         self.align = align
-        self.x = x
-        self.y = y
 
-    @property
-    def size(self):
-        """valid size, w and h that is not null"""
+    def get_size(self):
         return self.w, self.h
 
-    @property
-    def anchor(self):
-        """valid anchor, x and y that is not null"""
+    def set_size(self, size):
+        self.w, self.h = size
+
+    def del_size(self):
+        self.w = self.h = None
+
+    size = property(lambda self: self.get_size(),
+                    lambda self, size: self.set_size(size),
+                    lambda self: self.del_size())
+
+    def get_anchor(self):
         return self.x, self.y
+
+    def set_anchor(self, anchor):
+        self.x, self.y = anchor
+
+    def del_anchor(self):
+        self.x = self.y = None
+
+    anchor = property(lambda self: self.get_anchor(),
+                      lambda self, anchor: self.set_anchor(anchor),
+                      lambda self: self.del_anchor())
 
     def get_rect(self, surface):
         assert self.x and self.y
