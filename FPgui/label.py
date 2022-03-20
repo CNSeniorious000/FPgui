@@ -19,7 +19,7 @@ class Label(Widget, pg.sprite.Sprite):
     ):
         self.text = text
         x, y = anchor
-        Widget.__init__(self, None, None, align, scaled(x), scaled(y), window)
+        Widget.__init__(self, None, None, scaled(x), scaled(y), align, window)
         pg.sprite.Sprite.__init__(self, self.window.logic_group)
         self.image = self.rect = None
         self.align = align
@@ -64,7 +64,7 @@ class Monitor(Widget, pg.sprite.Sprite):
     ):
         self.entity = entity
         x, y = anchor
-        Widget.__init__(self, None, None, align, scaled(x), scaled(y), window)
+        Widget.__init__(self, None, None, scaled(x), scaled(y), align, window)
         pg.sprite.Sprite.__init__(self, self.window.logic_group)
 
         self.last = self.image = self.rect = None

@@ -10,8 +10,8 @@ class Window(MinimizedContainer):
     """cached scene or sub window"""
     current: "Window" = None
 
-    def __init__(self, size, align=Align.center, anchor=(None,None), bgd=None):
-        MinimizedContainer.__init__(self, *scaled(size), align, *scaled(anchor), window=self)
+    def __init__(self, size, anchor=(None,None), align=Align.center, bgd=None):
+        MinimizedContainer.__init__(self, *scaled(size), *scaled(anchor), align, window=self)
         buffer = pg.Surface(self.size)
         match bgd:
             case pg.Surface(): buffer.blit(bgd, (0, 0))
@@ -30,17 +30,17 @@ class Window(MinimizedContainer):
         return "Window(size={}x{}, anchor=({},{}))".format(*self.size, *self.anchor)
 
     @contextmanager
-    def using(self, relocation=True):
+    def using(self, frames: int = None, *, relocation=True):
         from .ui import use, main_loop
         use(self, relocation)
         yield self.__enter__()
-        main_loop()
+        main_loop(frames)
         self.__exit__(None, None, None)
 
-    def use(self, relocation=True):
+    def use(self, *, relocation=True):
         from .ui import use
         return use(self, relocation)
 
-    def use_async(self, relocation=True):
+    def use_async(self, frames: int = None, *, relocation=True):
         from .ui import use_async
-        return use_async(self, relocation)
+        return use_async(self, frames, relocation)

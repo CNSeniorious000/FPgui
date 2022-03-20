@@ -77,7 +77,7 @@ def hide(clear=True):
         return logger.error("window is already hidden")
     if clear:
         Window.current.queue.clear()
-    use(None, False)
+    use(None, relocation=False)
 
     return Action.break_loop
 
@@ -184,17 +184,26 @@ target = 60
 efficient = True
 display_fps = True
 title = "FPgui"
-num = 0
+num_frames = 0
+max_frames = 0
 
-def main_loop():
+def main_loop(frames=None):
     if (scene := Window.current) is None:
         return logger.error("no window on scene")
-    global num
+
+    global num_frames, max_frames
+    if frames is not None:
+        global max_frames
+        max_frames = frames
+
     logic_group = scene.logic_group
     render_group = scene.render_group
     queue = scene.queue
 
-    for num in count(num):
+    for num_frames in count(num_frames):
+        if 0 < max_frames < num_frames:
+            return hide()
+
         # parse all events
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -242,6 +251,14 @@ def main_loop():
         if display_fps:
             pg.display.set_caption(f"{title} @ {1000/_ :.2f}")
 
-def use_async(window:Window, relocation=True):
-    threading.Thread(target=lambda: use(window, relocation) and main_loop()).start()
+def use_async(window:Window, frames=None, relocation=True):
+    threading.Thread(target=lambda: use(window, relocation) and main_loop(frames)).start()
     return Action.scene_changed
+
+class Routine(Widget, pg.sprite.Sprite):
+    def __init__(self, *args, **kwargs):
+        Widget.__init__(self, *args, **kwargs)
+        pg.sprite.Sprite.__init__(self, self.window.logic_group)
+
+def add_task(function):
+    Routine().update = function

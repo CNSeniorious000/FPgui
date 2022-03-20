@@ -133,9 +133,9 @@ class Blend(enum.Enum):
 
 
 class MinimizedWidget:
-    """any widget with a certain location"""
+    """located widget (minimized for pickling)"""
 
-    def __init__(self, w, h, align:Align, x, y):
+    def __init__(self, w, h, x, y, align:Align):
         self.w = w
         self.h = h
         self.align = align
@@ -144,10 +144,12 @@ class MinimizedWidget:
 
     @property
     def size(self):
+        """valid size, w and h that is not null"""
         return self.w, self.h
 
     @property
     def anchor(self):
+        """valid anchor, x and y that is not null"""
         return self.x, self.y
 
     def get_rect(self, surface):
@@ -162,21 +164,23 @@ class MinimizedWidget:
 class Widget(MinimizedWidget):
     """widget in someplace"""
 
-    def __init__(self, w, h, align, x, y, parent=None, window=None):
-        MinimizedWidget.__init__(self, w, h, align, x, y)
+    def __init__(self, w=None, h=None, x=None, y=None, align=Align.center, parent=None, window=None):
+        MinimizedWidget.__init__(self, w, h, x, y, align)
         from . import ui
         from loguru import logger
         self.parent = parent or ui.current_parent
         self.window = window or ui.Window.current
         try:
             self.parent.append(self)
-            logger.success(f"bound {self} to {self.parent}")
         except AttributeError:
             if self.window is not self:
-                logger.warning(f"bound {self} to {self.parent}")
+                logger.warning(f"bound {self} to {self.parent}, {x = }, {y = }")
+
 
     def __repr__(self):
-        return f"Widget(parent={self.parent}, window={self.window})"
+        return "Widget(parent={}, size={}, anchor={}, window={})".format(
+            self.parent, self.size, self.anchor, self.window
+        )
 
     def check(self):
         return self in self.parent

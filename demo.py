@@ -6,11 +6,11 @@ from FPgui.label import Label, Monitor
 # fp.DO_SCALE = False
 # ui.efficient = False
 
-with scaling_at(125), ui.Window((1280, 720), Align.bottom_right, (-40,-40), bgd=0).using() as window:
-    Monitor(time.ctime, (80,80), ui.Align.top_left, 20, (0, 255, 255), cache=False)
-    Monitor(lambda: f"FPS: {ui.clock.get_fps():.1f}", (1200, 80), ui.Align.top_right, 20, (255, 0, 255))
-    rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640,360), ui.Align.center, 24, (0, 255, 0))
-    Monitor(rand.get_surface.inspect, (640, 80), ui.Align.mid_top, 16, (0, 255, 0), cache=False)
+with scaling_at(125), ui.Window((1280, 720), (-40,-40), Align.bottom_right, bgd=0).using(200) as window:
+    Monitor(time.ctime, (80,80), Align.top_left, 20, (0, 255, 255), cache=False)
+    Monitor(lambda: f"{100 * ui.num_frames / ui.max_frames :.0f}%", (1200, 80), Align.top_right, 20, (255, 0, 255))
+    rand = Monitor("' '+f'{str(np.random.randint(0,10,5,\"i8\"))[1:-1]} '*5", (640,360), Align.center, 24, (0, 255, 0))
+    Monitor(rand.get_surface.inspect, (640, 80), Align.mid_top, 16, (0, 255, 0), cache=False)
     Label("\n".join(i.strip() for i in """
     Hi! I'm a static label which never refresh.
     Labels around me called 'Monitors' showed its main usages:
@@ -19,26 +19,23 @@ with scaling_at(125), ui.Window((1280, 720), Align.bottom_right, (-40,-40), bgd=
     · The center one is a always-updating random number generator,
     · And the mid-top one shows its caching information.
     Hope you enjoy the great performance and pythonic charm!
-    """.strip().split("\n")) +"\n", (420, 672), ui.Align.bottom_left, 12, (255,) * 3)
+    """.strip().split("\n")) +"\n", (420, 672), Align.bottom_left, 12, (255,) * 3)
 
-    import pygame as pg
-    class Mover(Widget, pg.sprite.Sprite):
+    class Mover(ui.Routine):
         def __init__(self):
-            Widget.__init__(self, 0, 0, Align.center, None, None)
-            pg.sprite.Sprite.__init__(self, window.logic_group)
+            super().__init__()
             self.vx = self.vy = 1
 
         def update(self):
-            from FPgui.ui import anchor, move_window_to, DSIZE
-            x, y = anchor
-            w, h = DSIZE
+            x, y = ui.anchor
+            w, h = ui.DSIZE
 
             if not 0 <= x < w - window.w:
                 self.vx = -self.vx
             if not 0 <= y < h - window.h:
                 self.vy = -self.vy
 
-            move_window_to(x + self.vx, y + self.vy)
+            ui.move_window_to(x + self.vx, y + self.vy)
 
     Mover()
 
