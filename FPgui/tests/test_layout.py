@@ -1,12 +1,14 @@
 from FPgui import *
 
 
-def test_align():
+def test_align_name():
     assert Align.min_x is Align.left
     assert Align.max_x is Align.right
     assert Align.min_y is Align.top
     assert Align.max_y is Align.bottom
 
+
+def test_align_in():
     assert Align.min_x in Align.top_left
     assert Align.min_x in Align.mid_left
     assert Align.min_x in Align.bottom_left
@@ -17,6 +19,8 @@ def test_align():
     assert Align.max_x in Align.mid_right
     assert Align.max_x in Align.bottom_right
 
+
+def test_align_combinations():
     assert Align.min_y & Align.top_left is Align.min_y & Align.top_right is Align.min_y
     assert Align.mid_y & Align.mid_left is Align.mid_y & Align.mid_right is Align.mid_y
     assert Align.max_y & Align.bottom_left is Align.max_y & Align.bottom_right is Align.max_y
@@ -52,3 +56,9 @@ def test_MinimizedWidget():
 
     widget.anchor = [300, 400]
     assert widget.x, widget.y == [300, 400]
+
+
+def test_Widget():
+    widget = Widget()
+    assert isinstance(widget.window.window.window.window.window, Widget)
+    assert widget.parent is None
