@@ -4,6 +4,13 @@
 
 > 大量使用Python3.9的海象赋值符，少量使用Python3.10的match-case语法。体验该仓库时请注意解释器版本
 
+## TODO / NotImplemented
+
+- [x] 单元测试
+- [ ] 实现HBox、VBox
+- [ ] 实现anchor的分配
+- [ ] 实现MinimizedButton
+
 ## Getting Start
 
 - 以下展示python其他GUI框架（PyQt、WxPython等）所没有的特性

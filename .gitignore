@@ -1,6 +1,7 @@
 .idea
 .vscode
-.pytest_cache
+*/.benchmarks
+*/.pytest_cache
 */__pycache__
 FPgui/cache
 FPgui/assets
