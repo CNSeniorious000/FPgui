@@ -166,13 +166,9 @@ class memoize:
 
 
 class memoize_surfaces(memoize):
-    pass
-
-
-
-
-
-
+    @property
+    def raw(self):
+        return self._func
 
     @singledispatchmethod
     def blit(self, *_, **__):

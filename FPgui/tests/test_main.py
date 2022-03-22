@@ -1,21 +1,21 @@
-from FPgui import ui, scaling_at, scaled
+from FPgui import ui, scaling_at, scaled, Node
 
 original_size = (444, 444)
 ui.efficient = False
 
 
 def test_gravity_demo():
-    with scaling_at(25), ui.Window(original_size, bgd=(255,0,0)).using(90) as window:
+    with scaling_at(25), ui.Window(original_size, bgd=(0, 0, 0)).using(90) as window:
         assert window.canvas.get_size() == tuple(scaled(original_size))
         assert scaled(4) == 1
         assert tuple(ui.size) == window.get_size() == window.size
         assert None not in ui.anchor
 
-        class Mover(ui.Routine):
+        class Mover(Node):
             def __init__(self):
                 super().__init__()
                 self.vx, self.vy = 44, 0
-                assert window.check(recursive=True)
+                assert self in window.children
 
             def update(self):
                 x, y = ui.anchor
@@ -31,6 +31,6 @@ def test_gravity_demo():
 
         mover = Mover()
 
-        ui.add_task(lambda: exec("m.vy += 8", {}, {"m": mover}))
+        ui.routine(lambda: exec("m.vy += 8", {}, {"m": mover}))
 
-        assert mover.window is window
+        assert mover.root is window

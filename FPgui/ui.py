@@ -1,8 +1,9 @@
 from . import *
-from .window import *
+from .layout import *
 from itertools import count
 from functools import wraps
 from loguru import logger
+import pygame as pg
 import threading
 
 
@@ -43,7 +44,6 @@ def switch_to(window:Window):
     global screen
 
     if (scene := Window.current) is not None:
-        scene.shown = False
         scene.canvas = scene.canvas.copy()
     Window.current = window
 
@@ -85,8 +85,8 @@ def parse_mouse_pos(pos):
     if pos is None:
         logger.error("mouse position is None")
     global hovering
-    for widget in Window.current.logic_group:
-        widget: pg.sprite.Sprite
+    for widget in Window.current.children:
+        # TODO: make "collide" a method of Being instances
         try:
             rect = widget.rect
         except AttributeError:
@@ -138,46 +138,51 @@ def on_lose_focus():
         pressed.situation = Situation.standby
         pressed = None
 
-def clear_each(window:Window):
-    bgd = window.bgd
-    blit = window.canvas.blit
-    return [
-        blit(bgd, rect:=widget.rect, rect)
-        for widget in window.render_group
-    ]
+# def clear_each(window:Window):
+#     bgd = window.bgd
+#     blit = window.canvas.blit
+#     return [
+#         blit(bgd, rect:=widget.rect, rect)
+#         for widget in window.render_group
+#     ]
+#
+# def clear_union(window:Window):
+#     it = iter(window.render_group)
+#     rect = next(it).rect.unionall([s.rect for s in it])
+#     return window.canvas.blit(window.bgd, rect, rect)
+#
+# def clear_whole(window:Window):
+#     return window.canvas.blit(window.bgd, (0,0))
+#
+# clear_strategy = Strategy.each
+#
+# def on_clear(window:Window, heuristic=False):
+#     group = window.render_group
+#     if heuristic:
+#         global clear_strategy
+#         if len(group) > 12345:
+#             clear_strategy = Strategy.whole
+#             return clear_whole(window)
+#         else:
+#             if (total_size := sum(s.rect.font_size for s in group)) < \
+#                (union_size := (_:=clear_whole(window)).font_size()):
+#                 logger.info(f"({total_size=}) < ({union_size=})")
+#                 clear_strategy = Strategy.each
+#             else:
+#                 logger.info(f"({total_size=}) > ({union_size=})")
+#                 clear_strategy = Strategy.union
+#             return _
+#     else:
+#         match clear_strategy:
+#             case Strategy.each: return clear_each(window)
+#             case Strategy.union: return clear_union(window)
+#             case Strategy.whole: return clear_whole(window)
+#             case _: raise ValueError(type(clear_strategy), clear_strategy)
 
-def clear_union(window:Window):
-    it = iter(window.render_group)
-    rect = next(it).rect.unionall([s.rect for s in it])
-    return window.canvas.blit(window.bgd, rect, rect)
-
-def clear_whole(window:Window):
-    return window.canvas.blit(window.bgd, (0,0))
-
-clear_strategy = Strategy.each
-
-def on_clear(window:Window, heuristic=False):
-    group = window.render_group
-    if heuristic:
-        global clear_strategy
-        if len(group) > 12345:
-            clear_strategy = Strategy.whole
-            return clear_whole(window)
-        else:
-            if (total_size := sum(s.rect.font_size for s in group)) < \
-               (union_size := (_:=clear_whole(window)).font_size()):
-                logger.info(f"({total_size=}) < ({union_size=})")
-                clear_strategy = Strategy.each
-            else:
-                logger.info(f"({total_size=}) > ({union_size=})")
-                clear_strategy = Strategy.union
-            return _
-    else:
-        match clear_strategy:
-            case Strategy.each: return clear_each(window)
-            case Strategy.union: return clear_union(window)
-            case Strategy.whole: return clear_whole(window)
-            case _: raise ValueError(type(clear_strategy), clear_strategy)
+def routine(function):
+    routine = Node(current_parent)
+    routine.update = function
+    return routine
 
 clock = pg.time.Clock()
 target = 60
@@ -196,8 +201,7 @@ def main_loop(frames=None):
         global max_frames
         max_frames = frames
 
-    logic_group = scene.logic_group
-    render_group = scene.render_group
+    logic_group = scene.children
     queue = scene.queue
 
     for num_frames in count(num_frames):
@@ -228,8 +232,8 @@ def main_loop(frames=None):
             logger.info(f"calling {callback}(*{args}, **{kwargs})")
             if ans := callback(*args, **kwargs):
                 if Action.scene_changed in ans:
-                    logic_group = scene.logic_group
-                    render_group = scene.render_group
+                    scene = Window.current
+                    logic_group = scene.children
                     queue = scene.queue
 
                 ...
@@ -238,13 +242,11 @@ def main_loop(frames=None):
                     return hide()
  
         # update
-        if logic_group:
-            logic_group.update()
+        for widget in logic_group:
+            widget.update()  # add parameters here
            
         # clear & render
-        if render_group:
-            on_clear(scene)
-            pg.display.update(render_group.draw(screen))
+        pg.display.update(sum(scene.render(), []))  # use more "sum" algorithm here
 
         # tick
         _ = clock.tick(target) if efficient else clock.tick_busy_loop(target)
@@ -254,11 +256,3 @@ def main_loop(frames=None):
 def use_async(window:Window, frames=None, relocation=True):
     threading.Thread(target=lambda: use(window, relocation) and main_loop(frames)).start()
     return Action.scene_changed
-
-class Routine(Widget, pg.sprite.Sprite):
-    def __init__(self, *args, **kwargs):
-        Widget.__init__(self, *args, **kwargs)
-        pg.sprite.Sprite.__init__(self, self.window.logic_group)
-
-def add_task(function):
-    Routine().update = function

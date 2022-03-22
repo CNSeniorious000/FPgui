@@ -1,4 +1,6 @@
 from FPgui import *
+from FPgui import ui
+from FPgui.layout import Window
 
 
 def test_align_name():
@@ -39,7 +41,7 @@ def test_align_combinations():
 
 
 def test_MinimizedWidget():
-    widget = MinimizedWidget(1, 2, 3, 4, Align.center)
+    widget = Rect(1, 2, 3, 4, Align.center)
     assert widget.align == Align.center
     assert widget.w, widget.h == widget.size == widget.get_size()
     assert widget.x, widget.y == widget.anchor == widget.get_anchor()
@@ -59,6 +61,45 @@ def test_MinimizedWidget():
 
 
 def test_Widget():
-    widget = Widget()
-    assert isinstance(widget.window.window.window.window.window, Widget)
-    assert widget.parent is None
+    with Window((0, 0)):
+        widget = Widget()
+        assert widget.get_size() == widget.size
+        assert widget.get_anchor() == widget.anchor
+
+        assert widget.fixed is False
+        widget.size = [1, 2]
+        assert widget.fixed is True
+        del widget.size
+        assert widget.fixed is False
+
+
+def test_Being():
+    with Window((1234, 2345)):
+        widget = Being()
+        assert widget.dirty is False
+        widget.dirty = True
+        assert widget.dirty is True
+
+
+def test_Node():
+    assert Window.current is ui.current_parent is None
+
+    with scaling_at(100), Window(DSIZE, bgd=(255, 0, 0)).using(1) as window:
+        assert Window.current is not None
+        node = Node()
+        assert node.root is window is Window.current
+
+
+def test_Window():
+    with scaling_at(100):
+        with Window(DSIZE, bgd=(0, 255, 0)).using(1) as window_green:
+            assert Window.current is ui.current_parent is window_green
+            assert list(window_green.size) == DSIZE
+
+            with Window(DSIZE, bgd=(0, 0, 255)).using(1) as window_blue:
+                assert Window.current is ui.current_parent is window_blue
+                assert window_blue.window is window_blue.root is window_green, "但没关系"
+
+
+def test_ui():
+    assert ui._reset_video_system.__name__ == ui.pg.display.set_mode.__name__

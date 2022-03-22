@@ -1,91 +1,94 @@
 from . import *
-from .window import *
 from .magic import *
 from .config import *
-from typing import Any
+from functools import cached_property
+from autoprop import autoprop
+from loguru import logger
 
 
-class Label(Widget, pg.sprite.Sprite):
+class Label(Being):
     def __init__(
             self,
-            text: Any,
-            anchor: tuple[int,int],
+            anchor: tuple[int,int] = (None, None),
             align: Align = Align.center,
             font_size: int = text_size,
             font_color: tuple = black,
             font_path: str = font,
             subpixel: bool = True,
-            window: Window | None = None
     ):
-        self.text = text
-        x, y = anchor
-        Widget.__init__(self, None, None, scaled(x), scaled(y), align, window)
-        pg.sprite.Sprite.__init__(self, self.window.logic_group)
-        self.image = self.rect = None
-        self.align = align
+        Being.__init__(self, None, None, *scaled(anchor), align)
         self.font_size = scaled(font_size)
         self.font_color = font_color
         self.font_path = font_path
-        self.subpixel = subpixel
+        self.subpixel = subpixel  # useless for now
 
+    def draw(self, text):
+        return (surface := paint_PIL(
+            str(text), self.font_color, self.font_path, self.font_size, self.align_v
+        )), self.get_bbox(surface)
+
+
+class StaticText(Label):
+    def __init__(self, text, *args, **kwargs):
+        self.text = text
         self.shown = False
+        Label.__init__(self, *args, **kwargs)
 
     def __repr__(self):
         return f"Label(text={self.text!r})"
 
     def update(self):
         if self.shown:
-            self.kill()  # commit suicide
+            self.dirty = False
         else:
-            self.image = surface = paint_PIL(
-                str(self.text), self.font_color, self.font_path, self.font_size, self.align_v
-            )
-            self.rect = self.get_rect(surface)
-            self.shown = True
-            self.window.render_group.add(self)
+            self.shown = self.dirty = True
+
+    @cached_property
+    def surfs(self):
+        return [self.draw(self.text)]
 
 
-class Monitor(Widget, pg.sprite.Sprite):
-    def __init__(
-            self,
-            entity: Any,
-
-            anchor: tuple[int,int],
-            align: Align = Align.center,
-
-            font_size: int = text_size,
-            font_color: tuple = black,
-            font_path: str = font,
-
-            subpixel: bool = True,
-            cache: bool = True,
-
-            window: Window | None = None,
-    ):
+@autoprop
+class Monitor(Label):
+    def __init__(self, entity, *args, cache=True, **kwargs):
         self.entity = entity
-        x, y = anchor
-        Widget.__init__(self, None, None, scaled(x), scaled(y), align, window)
-        pg.sprite.Sprite.__init__(self, self.window.logic_group)
-
-        self.last = self.image = self.rect = None
-
-        self.font_size = font_size = scaled(font_size)
-        self.font_color = font_color
-        self.font_path = font_path
-        self.subpixel = subpixel
-
-        def get_surface(string):
-            return paint_PIL(
-                string, self.font_color, self.font_path, self.font_size, self.align_v
-            )
-        if cache:
-            get_surface.__name__ += f"-{align}-{font_size}-{font_color}-{font_path}"
-            self.get_surface = memoize_surfaces(get_surface)
-        else:
-            self.get_surface = get_surface
+        self.last = None
+        self.surfs = []
+        Label.__init__(self, *args, **kwargs)
+        self.get_surface = paint_PIL
+        self.cache = cache
 
     def __repr__(self):
         return f"Monitor(entity={self.entity!r})"
+
+    @cached_property
+    def bgd(self) -> pg.Surface:
+        return self.root.bgd
+
+    @staticmethod
+    @memoize_surfaces
+    def _get_surface_cached(text, font_color, font_path, font_size, align_v):
+        return paint_PIL(text, font_color, font_path, font_size, align_v)
+
+    def get_cache(self):
+        return isinstance(self.get_surface, memoize_surfaces)
+
+    def set_cache(self, cache):
+        match cache:
+            case False:
+                self.get_surface = self._get_surface_cached.raw
+            case True:
+                self.get_surface = self._get_surface_cached
+            case str():
+                memoize_surfaces.load(cache, self._get_surface_cached.__name__)
+
+    def del_cache(self):
+        self._get_surface_cached.data.clear()
+
+    def draw(self, text) -> tuple[pg.Surface, pg.Rect]:
+        return (surface := self.get_surface(
+            text, self.font_color, self.font_path, self.font_size, self.align_v
+        )), self.get_bbox(surface)
 
     def update(self):
         entity = self.entity
@@ -97,10 +100,16 @@ class Monitor(Widget, pg.sprite.Sprite):
             this = repr(entity)
 
         if this == self.last:
-            self.window.render_group.remove(self)
+            self.dirty = False
         else:
+            self.dirty = True
             self.last = this
-            self.window.render_group.add(self)
+            this_surf, this_rect = self.draw(str(this))
 
-            self.image = surface = self.get_surface(str(this))
-            self.rect = self.get_rect(surface)
+            try:
+                last_rect: pg.Rect = self.surfs[-1][1]
+                self.surfs.clear()
+                self.surfs.append((self.bgd, last_rect, last_rect))
+            except IndexError:
+                pass  # first time
+            self.surfs.append((this_surf, this_rect))

@@ -62,6 +62,9 @@ class Align(enum.IntFlag):
         """get positive x and y"""
         return x and x % W, y and y % H
 
+    def __repr__(self):
+        ...
+
 
 def locate(rect, align:Align, anchor):
     match align:
@@ -131,8 +134,8 @@ class Blend(enum.Enum):
     # a > 0.5 -> max(2(a-0.5), b)
 
 
-class MinimizedWidget:
-    """located widget (minimized for pickling)"""
+class Rect:
+    """physical concept of a widget"""
 
     def __init__(self, w:int, h:int, x:int, y:int, align:Align):
         self.w, self.h, self.x, self.y = w, h, x, y
@@ -147,9 +150,11 @@ class MinimizedWidget:
     def del_size(self):
         self.w = self.h = None
 
-    size = property(lambda self: self.get_size(),
-                    lambda self, size: self.set_size(size),
-                    lambda self: self.del_size())
+    size: tuple[int,int] = property(
+        lambda self: self.get_size(),
+        lambda self, size: self.set_size(size),
+        lambda self: self.del_size()
+    )
 
     def get_anchor(self):
         return self.x, self.y
@@ -160,11 +165,17 @@ class MinimizedWidget:
     def del_anchor(self):
         self.x = self.y = None
 
-    anchor = property(lambda self: self.get_anchor(),
-                      lambda self, anchor: self.set_anchor(anchor),
-                      lambda self: self.del_anchor())
+    anchor: tuple[int,int] = property(
+        lambda self: self.get_anchor(),
+        lambda self, anchor: self.set_anchor(anchor),
+        lambda self: self.del_anchor()
+    )
+    
+    @property
+    def fixed(self):
+        return None not in self.get_size()
 
-    def get_rect(self, surface):
+    def get_bbox(self, surface):
         assert self.x and self.y
         return locate(surface.get_rect(), self.align, (self.x, self.y))
 
@@ -173,26 +184,49 @@ class MinimizedWidget:
         return {1:"left", 2:"center", 4:"right"}[self.align >> 3]
 
 
-class Widget(MinimizedWidget):
-    """widget in someplace"""
+class Node:
+    """logical concept of a widget"""
 
-    def __init__(self, w=None, h=None, x=None, y=None, align=Align.center, parent=None, window=None):
-        MinimizedWidget.__init__(self, w, h, x, y, align)
+    def __init__(self, parent: "Node" = None):
         from . import ui
-        from loguru import logger
         self.parent = parent or ui.current_parent
-        self.window = window or ui.Window.current
         try:
             self.parent.append(self)
         except AttributeError:
-            if self.window is not self:
-                logger.warning(f"bound {self} to {self.parent}, {x = }, {y = }")
+            assert isinstance(self, ui.Window)
 
+    @property
+    def root(self):
+        return self.parent.root if self.parent else self
+
+    @staticmethod
+    def update(*args, **kwargs):
+        return NotImplemented
+
+
+class Widget(Rect, Node):
+    """widget entity"""
+
+    def __init__(self, w=None, h=None, x=None, y=None, align=Align.center, parent=None):
+        Rect.__init__(self, w, h, x, y, align)
+        Node.__init__(self, parent)
 
     def __repr__(self):
-        return "Widget(parent={}, size={}, anchor={}, window={})".format(
-            self.parent, self.size, self.anchor, self.window
+        return "Widget(size={}, anchor={}, parent={}, root={})".format(
+            self.size, self.anchor, self.parent, self.root
         )
 
-    def check(self):
-        return self in self.parent
+
+class Being(Widget):
+    """
+    widget that can be rendered
+
+    - **dirty** : whether to rerender
+    - **surfs** : the surface to render
+    - **rects** : the position to render
+    """
+
+    def __init__(self, *args, **kwargs):
+        Widget.__init__(self, *args, **kwargs)
+        self.dirty = False
+        self.surfs: list[tuple]

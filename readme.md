@@ -11,10 +11,18 @@
 - [ ] 实现anchor的分配
 - [ ] 实现MinimizedButton
 
+## 2022年3月23日大重构日志
+
+- 完全脱离了`pygame`中的`Sprite`和`Group`的束缚
+- 更符合逻辑的继承关系
+- 渲染现在由`Container`完成，而不是由`ui`统一完成。因此`Window`类也不再维护`render_group`和`logic_group`两个变量
+- `Being`类需要提供的接口也发生了更改，从原来的`image`和`rect`更改为现在的`surfs`列表，更加面向对象，且更加灵活
+- 布局的**自上而下`layout`**机制和**自下而上`resize`**框架已建立
+
 ## Getting Start
 
 - 以下展示python其他GUI框架（PyQt、WxPython等）所没有的特性
-- 以下五行代码是一个简单而华丽的demo
+- 以下五行代码是一个简单而华丽的demo **（两三个大版本前的了，有空再改）**
 
 ```python
 import time
@@ -26,7 +34,7 @@ with ui.using_async(ui.Window(1280, 720, 0)):
     Monitor("pg.mouse.get_pos()", (1200, 80), ui.Align.top_right, 18, (255, 0, 255))
     rand = Monitor("' '+f'{str(np.random.randint(0,10,5,np.uint8))[1:-1]} '*5", (640, 360), ui.Align.center, 22,
                    (0, 255, 0))
-    Monitor(rand.get_surface.inspect, (640, 640), ui.Align.mid_bottom, 15, (255, 255, 255), cache=False)
+    Monitor(rand.raw_renderer.inspect, (640, 640), ui.Align.mid_bottom, 15, (255, 255, 255), cache=False)
 ```
 
 - 上下文管理器`using_async`意味着事件循环运行在非主线程中(否则请使用`using`替代)，因此如果用 `ipython -i demo.py` 运行该脚本，你可以尝试在实时显示的同时更改界面
@@ -70,15 +78,3 @@ with ui.using_async(ui.Window(1280, 720, 0)):
 
 - widgets.py提供了作者本人模仿一些UI/UX或者影视作品设计的组件预设，为大家提供灵感
     - 完成度不高，故暂时没有上传
-
----
-
-#### `demo.py`现存的一些问题：
-
-- 如果事件循环不在主线程，则无法使用ui.hide()关闭窗口
-- `clear()`与`update()`的先后顺序遇到了一个两难的局面：
-    - 如果先`clear()`，那么就会多擦除一次(因为擦除之后才从`render_group`中删除自身)
-    - 如果先`update()`，那么就会丢失掉需要擦除的`rect`，导致擦除不全
-    - 目前想到的方法
-        - 一是可以让clear在update中进行，但这样就浪费了`on_clear()`中的种种巧思
-        - 一是可以给他们一个last属性，但这样性能会不会(?)
