@@ -72,8 +72,8 @@ class Window(Container):
     current: "Window" = None
 
     def __init__(self, size, anchor=(None,None), align=Align.center, bgd=None):
-        scaled_size = scaled(size)
-        buffer = pg.Surface(scaled_size)
+        from . import ui  # to enable buffer.convert()
+        buffer = pg.Surface(scaled_size := scaled(size))
         match bgd:
             case pg.Surface(): buffer.blit(bgd, (0, 0))
             case np.ndarray(ndim=3): pg.surfarray.blit_array(buffer, bgd)
@@ -82,7 +82,15 @@ class Window(Container):
             case None: pass
             case _: raise TypeError(f"{type(bgd) = }")
         self.canvas = self.bgd = buffer.convert()
-        Container.__init__(self, *scaled_size, *scaled(anchor), align)
+
+        x, y = scaled(anchor)
+        if align is Align.center:  # TODO: 应该让window.anchor和ui.anchor都非null. 改写 getter setter >>>
+            W, H = DSIZE
+            if x is None:
+                x = W // 2
+            if y is None:
+                y = H // 2
+        Container.__init__(self, *scaled_size, x, y, align)
         self.queue = deque()
 
     def __repr__(self):
@@ -91,6 +99,12 @@ class Window(Container):
     @property
     def root(self):
         return self
+
+    def set_anchor(self, anchor):
+        from . import ui
+        self.x, self.y = anchor
+        ui.anchor[:] = anchor
+        ui.move_to(*anchor, self.align)
 
     def render(self):
         blits = self.canvas.blits

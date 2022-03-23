@@ -96,7 +96,7 @@ def test_Window():
             assert Window.current is ui.current_parent is window_green
             assert list(window_green.size) == DSIZE
 
-            with Window(DSIZE, bgd=(0, 0, 255)).using(1) as window_blue:
+            with Window(DSIZE, bgd=(0, 0, 255)).using(8) as window_blue:
                 assert Window.current is ui.current_parent is window_blue
 
                 assert window_blue.window is window_blue

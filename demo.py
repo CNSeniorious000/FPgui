@@ -32,7 +32,8 @@ with scaling_at(125), ui.Window((1280, 720), (-40,-40), Align.bottom_right, bgd=
             if not 0 <= y < h - window.h:
                 self.vy = -self.vy
 
-            ui.move_window_to(x + self.vx, y + self.vy)
+            # ui.move_to(x + self.vx, y + self.vy, Align.top_left)
+            ui.move(self.vx, self.vy)
 
     # ui.routine(lambda: ui.pg.image.save(window.canvas, f"./FPgui/cache/{ui.num_frames=}.png"))
 

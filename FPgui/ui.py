@@ -9,7 +9,7 @@ import threading
 
 flags = pg.NOFRAME
 size = []  # last window's size
-anchor = [None, None]  # last window's anchor
+anchor = [None, None]  # last window's top-left corner's coordinate
 screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
 hovering = pressed = None
 current_parent: "Container" = None
@@ -25,19 +25,22 @@ def _reset_video_system(*args, **kwargs):
     # switching to MainThread from others doesn't cause DeadLock
     return pg.display.set_mode(*args, **kwargs)
 
-def move_window_to(x, y):
-    global anchor
-    anchor[:] = x, y
-    ctypes.windll.user32.MoveWindow(pg.display.get_wm_info()["window"], x, y, *size, False)
+def move(dx, dy, repaint=False):
+    X, Y = anchor
+    move_to(X + dx, Y + dy, Align.top_left, False, repaint)
 
-def relocate():
+def move_to(x=None, y=None, align=None, normalize=True, repaint=False):
     scene = Window.current
-    W, H = DSIZE
+    if align is None:
+        align = scene.align
+    # logger.info(f"locating {scene}'s {align.name} to ({x},{y})")
+
     w, h = size
     X, Y = anchor
-    x, y = scene.align.translate_to_top_left(*Align.normalize(*scene.anchor, W, H), w, h)
-    logger.debug(f"locating {scene}'s {scene.align.name} to ({x},{y})")
-    move_window_to(x or X or (W - w) // 2, y or Y or (H - h) // 2)
+    x, y = align.translate_to_top_left(*Align.normalize(x, y, *DSIZE), w, h) \
+        if normalize else align.translate_to_top_left(x, y, w, h)
+    anchor[:] = X if x is None else x, Y if y is None else y  # update anchor
+    ctypes.windll.user32.MoveWindow(pg.display.get_wm_info()["window"], x, y, w, h, repaint)
 
 def switch_to(window:Window):
     logger.debug(f"switching to {window}")
@@ -66,7 +69,7 @@ def use(window:Window, relocation=True):
     switch_to(window)
 
     if relocation:
-        relocate()
+        move_to(*window.anchor, window.align)
 
     pg.display.flip()
 
