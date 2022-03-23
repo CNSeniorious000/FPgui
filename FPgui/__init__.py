@@ -62,9 +62,6 @@ class Align(enum.IntFlag):
         """get positive x and y"""
         return x and x % W, y and y % H
 
-    def __repr__(self):
-        ...
-
 
 def locate(rect, align:Align, anchor):
     match align:

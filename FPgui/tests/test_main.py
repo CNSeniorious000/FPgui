@@ -34,3 +34,20 @@ def test_gravity_demo():
         ui.routine(lambda: exec("m.vy += 8", {}, {"m": mover}))
 
         assert mover.root is window
+
+
+def test_nested():
+    screenx, screeny = ui.DSIZE
+    assert screenx // 16 == screeny // 9
+    a = screenx // 16
+    windows = ui.deque()
+    with scaling_at(100):
+        for i in range(16):
+            for j in range(9):
+                windows.append(context := ui.Window(
+                    (a, a), (i * a, j * a), ui.Align.top_left, len(windows) + 111
+                ).using(1))
+                # TODO: 手动mainloop()
+                context.__enter__()
+        for context in reversed(windows):
+            context.__exit__(None, None, None)
