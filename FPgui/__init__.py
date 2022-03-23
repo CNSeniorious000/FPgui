@@ -197,7 +197,10 @@ class Node:
 
     @property
     def root(self):
-        return self.parent.root if self.parent else self
+        try:
+            return self.parent.root
+        except AttributeError:
+            return self
 
     @staticmethod
     def update(*args, **kwargs):

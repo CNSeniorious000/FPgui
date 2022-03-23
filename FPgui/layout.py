@@ -88,6 +88,10 @@ class Window(Container):
     def __repr__(self):
         return "Window(size={}x{}, anchor=({},{}))".format(*self.size, *self.anchor)
 
+    @property
+    def root(self):
+        return self
+
     def render(self):
         blits = self.canvas.blits
         return [

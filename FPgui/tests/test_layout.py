@@ -1,6 +1,6 @@
 from FPgui import *
 from FPgui import ui
-from FPgui.layout import Window
+from FPgui.layout import Window, Container
 
 
 def test_align_name():
@@ -98,7 +98,13 @@ def test_Window():
 
             with Window(DSIZE, bgd=(0, 0, 255)).using(1) as window_blue:
                 assert Window.current is ui.current_parent is window_blue
-                assert window_blue.window is window_blue.root is window_green, "但没关系"
+
+                assert window_blue.window is window_blue
+                assert window_blue.root is window_blue
+                assert window_blue.parent is window_green
+                assert Container().window is window_blue
+
+            assert Container().root is window_green
 
 
 def test_ui():
