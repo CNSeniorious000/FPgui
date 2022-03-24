@@ -84,6 +84,9 @@ class Window(Container):
         self.canvas = self.bgd = buffer.convert()
 
         x, y = scaled(anchor)
+        match anchor:
+            case None, None:
+                anchor = align.translate(...)  # under construction
         if align is Align.center:  # TODO: 应该让window.anchor和ui.anchor都非null. 改写 getter setter >>>
             W, H = DSIZE
             if x is None:

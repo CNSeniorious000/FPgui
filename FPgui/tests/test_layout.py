@@ -36,8 +36,28 @@ def test_align_combinations():
     for h in Align.min_x, Align.mid_x, Align.max_x:
         for v in Align.min_y, Align.mid_y, Align.max_y:
             assert h | v in Align
+            assert h | v is v | h
 
-    assert not any(Align.bottom_right.translate_to_top_left(123, 234, 123, 234))
+    assert Align.left not in Align.top_right
+
+
+def test_align_translation():
+    assert Align.top_left.vertical is Align.top
+    assert Align.top_left.horizontal is Align.left
+    for vertical in {Align.min_y, Align.mid_y, Align.max_y}:
+        for horizontal in {Align.min_x, Align.min_x, Align.max_x}:
+            assert vertical.vertical is vertical
+            assert horizontal.horizontal is horizontal
+            assert not vertical.horizontal or horizontal.vertical
+            combination = vertical | horizontal
+            assert combination.vertical is vertical
+            assert combination.horizontal is horizontal
+
+    assert Align.mid_right.translate(10, 5, 10, 10) == (0, 0)
+    assert Align.center.translate(0, 0, 100, 100) == (-50, -50)
+    assert Align.top_left.translate(0, 0, 1234, 5678, Align.bottom_right) == (1234, 5678)
+
+    assert not any(Align.bottom_right.translate(123, 234, 123, 234))
 
 
 def test_MinimizedWidget():

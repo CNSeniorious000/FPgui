@@ -37,8 +37,8 @@ def move_to(x=None, y=None, align=None, normalize=True, repaint=False):
 
     w, h = size
     X, Y = anchor
-    x, y = align.translate_to_top_left(*Align.normalize(x, y, *DSIZE), w, h) \
-        if normalize else align.translate_to_top_left(x, y, w, h)
+    x, y = align.translate(*Align.normalize(x, y, *DSIZE), w, h) \
+        if normalize else align.translate(x, y, w, h)
     anchor[:] = X if x is None else x, Y if y is None else y  # update anchor
     ctypes.windll.user32.MoveWindow(pg.display.get_wm_info()["window"], x, y, w, h, repaint)
 

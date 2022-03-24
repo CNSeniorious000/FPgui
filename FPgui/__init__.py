@@ -44,18 +44,19 @@ class Align(enum.IntFlag):
     bottom_left  = min_x | max_y  # 左下
     bottom_right = max_x | max_y  # 右下
 
-    def translate_to_top_left(self, x, y, w, h):
-        if x is not None:
-            if Align.mid_x in self:
-                x -= w // 2
-            elif Align.max_x in self:
-                x -= w
-        if y is not None:
-            if Align.mid_y in self:
-                y -= h // 2
-            elif Align.max_y in self:
-                y -= h
-        return x, y
+    @property
+    def vertical(self):
+        return self & 0b111
+
+    @property
+    def horizontal(self):
+        return self & 0b111000
+
+    def translate(self, x, y, w, h, to=top_left):
+        import math
+        dx = int(math.log2((to >> 3) / (self >> 3)) * w / 2)
+        dy = int(math.log2((to & 0b111) / (self & 0b111)) * h / 2)
+        return x + dx, y + dy
 
     @staticmethod
     def normalize(x, y, W, H):
@@ -137,6 +138,13 @@ class Rect:
     def __init__(self, w:int, h:int, x:int, y:int, align:Align):
         self.w, self.h, self.x, self.y = w, h, x, y
         self.align = align
+
+    def translate(self, to=Align.top_left):
+        return self.align.translate(self.x, self.y, self.w, self.h, to)
+
+    def set_align(self, align):
+        self.align = align
+        self.set_anchor(*self.translate(align))
 
     def get_size(self):
         return self.w, self.h
