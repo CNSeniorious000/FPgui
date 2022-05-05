@@ -18,7 +18,7 @@ while True:
     radius = min(y, x) * percentage
     print(f"{radius = }")
 
-    carver(alpha, radius )
+    carver(alpha, radius)
     out[..., 3] = alpha
 
     output_path = f"{filepath[:filepath.rindex('.')]}_rounded.png"

@@ -5,7 +5,7 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable ads
 os.environ['PYGAME_BLEND_ALPHA_SDL2'] = '1'  # enable blend
 ctypes.windll.user32.SetProcessDPIAware(2)
 SF = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-DSIZE = list(map(win32api.GetSystemMetrics, (0,1)))
+DSIZE = list(map(win32api.GetSystemMetrics, (0, 1)))
 
 
 def scaled(val):
@@ -18,6 +18,7 @@ def scaled(val):
     else:
         return val
 
+
 @contextlib.contextmanager
 def scaling_at(factor):
     global SF
@@ -27,12 +28,12 @@ def scaling_at(factor):
 
 
 class Align(enum.IntFlag):
-    min_y = top    = enum.auto()
-    mid_y =          enum.auto()
-    max_y = bottom = enum.auto()
-    min_x = left   = enum.auto()
-    mid_x =          enum.auto()
-    max_x = right  = enum.auto()
+    min_y = top    = 0b000001
+    mid_y =          0b000010
+    max_y = bottom = 0b000100
+    min_x = left   = 0b001000
+    mid_x =          0b010000
+    max_x = right  = 0b100000
 
     mid_top      = mid_x | min_y  # 中上
     mid_bottom   = mid_x | max_y  # 中下
@@ -64,7 +65,7 @@ class Align(enum.IntFlag):
         return x and x % W, y and y % H
 
 
-def locate(rect, align:Align, anchor):
+def locate(rect, align: Align, anchor):
     match align:
         case Align.top_left: rect.topleft = anchor
         case Align.mid_top: rect.midtop = anchor
@@ -88,8 +89,8 @@ class Situation(enum.IntEnum):
 
 class Action(enum.Flag):
     nothing = 0
-    scene_changed = enum.auto()
-    break_loop = enum.auto()
+    scene_changed = 1
+    break_loop = 2
 
 
 class Strategy(enum.IntEnum):
@@ -132,10 +133,11 @@ class Blend(enum.Enum):
     # a > 0.5 -> max(2(a-0.5), b)
 
 
+# noinspection PyPropertyDefinition
 class Rect:
     """physical concept of a widget"""
 
-    def __init__(self, w:int, h:int, x:int, y:int, align:Align):
+    def __init__(self, w: int, h: int, x: int, y: int, align: Align):
         self.w, self.h, self.x, self.y = w, h, x, y
         self.align = align
 
@@ -155,7 +157,7 @@ class Rect:
     def del_size(self):
         self.w = self.h = None
 
-    size: tuple[int,int] = property(
+    size: tuple[int, int] = property(
         lambda self: self.get_size(),
         lambda self, size: self.set_size(size),
         lambda self: self.del_size()
@@ -170,12 +172,12 @@ class Rect:
     def del_anchor(self):
         self.x = self.y = None
 
-    anchor: tuple[int,int] = property(
+    anchor: tuple[int, int] = property(
         lambda self: self.get_anchor(),
         lambda self, anchor: self.set_anchor(anchor),
         lambda self: self.del_anchor()
     )
-    
+
     @property
     def fixed(self):
         return None not in self.get_size()
@@ -186,7 +188,7 @@ class Rect:
 
     @property
     def align_v(self):
-        return {1:"left", 2:"center", 4:"right"}[self.align >> 3]
+        return {1: "left", 2: "center", 4: "right"}[self.align >> 3]
 
 
 class Node:
@@ -196,7 +198,7 @@ class Node:
         from . import ui
         self.parent = parent or ui.current_parent
         try:
-            self.parent.append(self)
+            self.parent = self
         except AttributeError:
             assert isinstance(self, ui.Window)
 
