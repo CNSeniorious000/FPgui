@@ -8,7 +8,7 @@ class Container(Widget):
     def __init__(self, *args, **kwargs):
         self.children = deque()
         Widget.__init__(self, *args, **kwargs)
-        self.window: Window = self.root
+        self.window: Window = self.root_window
 
     def resize(self):  # bottom up
         """宣称大小改变，向上找，直到找到一个size确定的，开始layout"""
@@ -22,9 +22,9 @@ class Container(Widget):
         return self.get_size()
 
     def render(self) -> list[list[pg.Rect]]:
-        blits = self.window.canvas.blits
+        canvas_blits = self.window.canvas.blits
         return [
-            blits(widget.surfs)
+            canvas_blits(widget.surfs)
             for widget in self.children
             if isinstance(widget, Being) and widget.dirty
         ]
@@ -71,7 +71,7 @@ class Window(Container):
     """cached scene or sub window"""
     current: "Window" = None
 
-    def __init__(self, size, anchor=(None,None), align=Align.center, bgd=None):
+    def __init__(self, size, anchor=(None, None), align=Align.center, bgd=None):
         from . import ui  # to enable buffer.convert()
         buffer = pg.Surface(scaled_size := scaled(size))
         match bgd:
@@ -84,6 +84,10 @@ class Window(Container):
         self.canvas = self.bgd = buffer.convert()
 
         x, y = scaled(anchor)
+        w, h = scaled_size
+
+
+
         match anchor:
             case None, None:
                 anchor = align.translate(...)  # under construction
@@ -100,7 +104,7 @@ class Window(Container):
         return "Window(size={}x{}, anchor=({},{}))".format(*self.size, *self.anchor)
 
     @property
-    def root(self):
+    def root_window(self):
         return self
 
     def set_anchor(self, anchor):

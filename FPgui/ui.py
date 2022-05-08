@@ -6,13 +6,12 @@ from loguru import logger
 import pygame as pg
 import threading
 
-
 flags = pg.NOFRAME
 size = []  # last window's size
 anchor = [None, None]  # last window's top-left corner's coordinate
-screen = pg.display.set_mode((1,1), flags=pg.HIDDEN)  # to enable convert()
+screen = pg.display.set_mode((1, 1), flags=pg.HIDDEN)  # to enable convert()
 hovering = pressed = None
-current_parent: "Container" = None
+current_parent: Container | None = None
 
 
 @wraps(pg.display.set_mode)
@@ -25,9 +24,11 @@ def _reset_video_system(*args, **kwargs):
     # switching to MainThread from others doesn't cause DeadLock
     return pg.display.set_mode(*args, **kwargs)
 
+
 def move(dx, dy, repaint=False):
     X, Y = anchor
     move_to(X + dx, Y + dy, Align.top_left, False, repaint)
+
 
 def move_to(x=None, y=None, align=None, normalize=True, repaint=False):
     scene = Window.current
@@ -42,7 +43,8 @@ def move_to(x=None, y=None, align=None, normalize=True, repaint=False):
     anchor[:] = X if x is None else x, Y if y is None else y  # update anchor
     ctypes.windll.user32.MoveWindow(pg.display.get_wm_info()["window"], x, y, w, h, repaint)
 
-def switch_to(window:Window):
+
+def switch_to(window: Window):
     logger.debug(f"switching to {window}")
     global screen
 
@@ -58,12 +60,13 @@ def switch_to(window:Window):
     if window.size != size:
         size[:] = window.size
         screen = _reset_video_system(size, flags | pg.SHOWN, vsync=True)
-    screen.blit(window.canvas, (0,0))
+    screen.blit(window.canvas, (0, 0))
     window.canvas = screen
 
     return Action.scene_changed
 
-def use(window:Window, relocation=True):
+
+def use(window: Window, relocation=True):
     if window is Window.current:
         return logger.warning(f"<{window = }> on scene")
     switch_to(window)
@@ -75,6 +78,7 @@ def use(window:Window, relocation=True):
 
     return Action.scene_changed
 
+
 def hide(clear=True):
     if Window.current is None:
         return logger.error("window is already hidden")
@@ -83,6 +87,7 @@ def hide(clear=True):
     use(None, relocation=False)
 
     return Action.break_loop
+
 
 def parse_mouse_pos(pos):
     if pos is None:
@@ -98,7 +103,7 @@ def parse_mouse_pos(pos):
         if rect is None:
             logger.warning(f"{widget}.rect is None")
             continue
-        
+
         if rect.collidepoint(pos):
             if widget is hovering:
                 return
@@ -117,6 +122,7 @@ def parse_mouse_pos(pos):
         hovering.situation = Situation.standby
         hovering = None
 
+
 def parse_event(event):
     global pressed
     match event.type:
@@ -132,6 +138,7 @@ def parse_event(event):
         case _:
             ...
 
+
 def on_lose_focus():
     global hovering, pressed
     if hovering is not None:
@@ -140,6 +147,7 @@ def on_lose_focus():
     if pressed is not None:
         pressed.situation = Situation.standby
         pressed = None
+
 
 # def clear_each(window:Window):
 #     bgd = window.bgd
@@ -187,6 +195,7 @@ def routine(function):
     routine.update = function
     return routine
 
+
 clock = pg.time.Clock()
 target = 60
 efficient = True
@@ -194,6 +203,7 @@ display_fps = True
 title = "FPgui"
 num_frames = 0
 max_frames = 0
+
 
 def main_loop(frames=None):
     if (scene := Window.current) is None:
@@ -243,19 +253,20 @@ def main_loop(frames=None):
 
                 if Action.break_loop in ans:
                     return hide()
- 
+
         # update
         for widget in logic_group:
             widget.update()  # add parameters here
-           
+
         # clear & render
         pg.display.update(sum(scene.render(), []))  # use more "sum" algorithm here
 
         # tick
         _ = clock.tick(target) if efficient else clock.tick_busy_loop(target)
         if display_fps:
-            pg.display.set_caption(f"{title} @ {1000/_ :.2f}")
+            pg.display.set_caption(f"{title} @ {1000 / _ :.2f}")
 
-def use_async(window:Window, frames=None, relocation=True):
+
+def use_async(window: Window, frames=None, relocation=True):
     threading.Thread(target=lambda: use(window, relocation) and main_loop(frames)).start()
     return Action.scene_changed

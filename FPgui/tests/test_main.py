@@ -35,7 +35,7 @@ def test_gravity_demo():
 
         ui.routine(lambda: exec("m.vy += 8", {}, {"m": mover}))
 
-        assert mover.root is window
+        assert mover.root_window is window
 
 
 def test_nested():  # FAILING: switching back is useless

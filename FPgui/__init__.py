@@ -1,8 +1,17 @@
-import os, enum, ctypes, win32api, contextlib
-os.environ['NUMBA_NUM_THREADS'] = '1'  # disable multiprocessing
-os.environ['SDL_VIDEO_CENTERED'] = '1'  # enable first centering
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable ads
-os.environ['PYGAME_BLEND_ALPHA_SDL2'] = '1'  # enable blend
+import enum, ctypes, win32api
+from os import environ
+from functools import cached_property
+from contextlib import contextmanager
+
+environ.update(  # maybe loaded from a config file in the future
+    {
+        'NUMBA_NUM_THREADS': '1',  # disable multiprocessing
+        'SDL_VIDEO_CENTERED': '1',  # enable first centering
+        'PYGAME_BLEND_ALPHA_SDL2': '1',  # enable blend
+        'PYGAME_HIDE_SUPPORT_PROMPT': '1'  # disable ads
+    }
+)
+
 ctypes.windll.user32.SetProcessDPIAware(2)
 SF = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 DSIZE = list(map(win32api.GetSystemMetrics, (0, 1)))
@@ -19,7 +28,7 @@ def scaled(val):
         return val
 
 
-@contextlib.contextmanager
+@contextmanager
 def scaling_at(factor):
     global SF
     SF, factor = factor, SF
@@ -202,10 +211,10 @@ class Node:
         except AttributeError:
             assert isinstance(self, ui.Window)
 
-    @property
-    def root(self):
+    @cached_property
+    def root_window(self):
         try:
-            return self.parent.root
+            return self.parent.root_window
         except AttributeError:
             return self
 
@@ -223,7 +232,7 @@ class Widget(Rect, Node):
 
     def __repr__(self):
         return "Widget(size={}, anchor={}, parent={}, root={})".format(
-            self.size, self.anchor, self.parent, self.root
+            self.size, self.anchor, self.parent, self.root_window
         )
 
 

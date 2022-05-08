@@ -107,7 +107,7 @@ def test_Node():
     with scaling_at(100), Window(DSIZE, bgd=(255, 0, 0)).using(1) as window:
         assert Window.current is not None
         node = Node()
-        assert node.root is window is Window.current
+        assert node.root_window is window is Window.current
 
 
 def test_Window():
@@ -120,11 +120,11 @@ def test_Window():
                 assert Window.current is ui.current_parent is window_blue
 
                 assert window_blue.window is window_blue
-                assert window_blue.root is window_blue
+                assert window_blue.root_window is window_blue
                 assert window_blue.parent is window_green
                 assert Container().window is window_blue
 
-            assert Container().root is window_green
+            assert Container().root_window is window_green
 
 
 def test_ui():

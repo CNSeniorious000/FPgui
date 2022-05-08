@@ -63,7 +63,7 @@ class Monitor(Label):
 
     @cached_property
     def bgd(self) -> pg.Surface:
-        return self.root.bgd
+        return self.root_window.bgd
 
     @staticmethod
     @memoize_surfaces
