@@ -31,8 +31,8 @@ def move(dx, dy, repaint=False):
 
 
 def move_to(x=None, y=None, align=None, normalize=True, repaint=False):
-    scene = Window.current
     if align is None:
+        scene = Window.current
         align = scene.align
     # logger.info(f"locating {scene}'s {align.name} to ({x},{y})")
 

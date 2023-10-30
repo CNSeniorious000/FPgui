@@ -98,7 +98,7 @@ def test_Being():
         widget = Being()
         assert widget.dirty is False
         widget.dirty = True
-        assert widget.dirty is True
+        assert widget.dirty
 
 
 def test_Node():

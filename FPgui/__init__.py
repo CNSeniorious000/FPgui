@@ -18,14 +18,13 @@ DSIZE = list(map(win32api.GetSystemMetrics, (0, 1)))
 
 
 def scaled(val):
-    if SF:
-        try:
-            assert val is None or val % 4 == 0
-            return val and val * SF // 100
-        except TypeError:
-            return [v and v * SF // 100 for v in val]
-    else:
+    if not SF:
         return val
+    try:
+        assert val is None or val % 4 == 0
+        return val and val * SF // 100
+    except TypeError:
+        return [v and v * SF // 100 for v in val]
 
 
 @contextmanager
@@ -231,9 +230,7 @@ class Widget(Rect, Node):
         Node.__init__(self, parent)
 
     def __repr__(self):
-        return "Widget(size={}, anchor={}, parent={}, root={})".format(
-            self.size, self.anchor, self.parent, self.root_window
-        )
+        return f"Widget(size={self.size}, anchor={self.anchor}, parent={self.parent}, root={self.root_window})"
 
 
 class Being(Widget):
