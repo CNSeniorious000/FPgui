@@ -37,7 +37,24 @@ except ImportError:
         """a competitive implementation of INTER_AREA algorithm"""
         x, y = size
         c = img.ndim  # len(img.shape)
-        if c == 3:
+        if c == 2:
+            h, w = img.shape
+            out = np.empty((y, x), np.uint8)
+            xx, yy = w // x, h // y
+            factor = xx * yy
+            mm = 0
+            for i in nb.prange(y):
+                nn = 0
+                for j in range(x):
+                    tmp = 0.5
+                    for m in range(mm, mm + yy):
+                        for n in range(nn, nn + xx):
+                            tmp += img[m, n]
+                    out[i, j] = tmp / factor
+
+                    nn += xx
+                mm += yy
+        elif c == 3:
             h, w = img.shape[:2]
             out = np.empty((y, x, 3), np.uint8)
             xx, yy = w // x, h // y
@@ -56,23 +73,6 @@ except ImportError:
                     out[i, j, 0] = tmp[0] / factor
                     out[i, j, 1] = tmp[1] / factor
                     out[i, j, 2] = tmp[2] / factor
-
-                    nn += xx
-                mm += yy
-        elif c == 2:
-            h, w = img.shape
-            out = np.empty((y, x), np.uint8)
-            xx, yy = w // x, h // y
-            factor = xx * yy
-            mm = 0
-            for i in nb.prange(y):
-                nn = 0
-                for j in range(x):
-                    tmp = 0.5
-                    for m in range(mm, mm + yy):
-                        for n in range(nn, nn + xx):
-                            tmp += img[m, n]
-                    out[i, j] = tmp / factor
 
                     nn += xx
                 mm += yy
@@ -235,7 +235,7 @@ def carver(alpha:np.ndarray, radius:float):
     mid = int(min(alpha.shape) / 2 - radius)
     end = 1 + int(radius * np.log(128 * radius))
     if mid < end:
-        print("WARNING: mid = " + str(mid), "while end = " + str(end))
+        print(f"WARNING: mid = {mid}", f"while end = {str(end)}")
 
     loss = radius % 1
     # for _i in nb.prange(end):

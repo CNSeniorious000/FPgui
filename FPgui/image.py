@@ -63,4 +63,4 @@ class Image:
             return self.data.blit(source.surf, dest, area, flag)
         else:
             x, y = dest[:2]
-            w, h = area if area is None else area
+            w, h = area

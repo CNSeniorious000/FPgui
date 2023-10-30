@@ -10,13 +10,12 @@ class Container(Widget):
         Widget.__init__(self, *args, **kwargs)
         self.window: Window = self.root_window
 
-    def resize(self):  # bottom up
+    def resize(self):    # bottom up
         """宣称大小改变，向上找，直到找到一个size确定的，开始layout"""
         if (parent := self.parent) is None:
             return self.layout()
-        else:
-            assert isinstance(parent, Container)
-            return parent.layout() if parent.fixed else parent.resize()
+        assert isinstance(parent, Container)
+        return parent.layout() if parent.fixed else parent.resize()
 
     def layout(self):  # top down
         return self.get_size()
